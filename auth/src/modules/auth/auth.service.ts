@@ -1,20 +1,37 @@
-import { ILoginPayload } from "src/common/interface";
+import { ILoginPayload, ISignupPayload } from "src/common/interface";
 import { AUTH_MESSAGE_CONSTANT } from "../../common/constant";
 import { Auth } from "./auth.schema";
-import { BcryptHelper } from "src/common/utils";
+import { BcryptHelper } from "../../common/utils";
 
 export class AuthService {
-  public async signup(reqBody: any) {
-    if (reqBody.password !== reqBody.confirmPassword) throw new Error(AUTH_MESSAGE_CONSTANT.PASSWORD_AND_CONFIRM_PASSWORD_NOT_MATCHED);
+  public async signup(payload: ISignupPayload) {
+    if (payload.password !== payload.confirmPassword) throw new Error(AUTH_MESSAGE_CONSTANT.PASSWORD_AND_CONFIRM_PASSWORD_NOT_MATCHED);
 
-    return "suraj";
+    const email_taken = await Auth.findOne({ email: payload.email });
+    if (email_taken) throw new Error(AUTH_MESSAGE_CONSTANT.EMAIL_ALREADY_TAKEN);
+
+    const username_taken = await Auth.findOne({ email: payload.email });
+    if (username_taken) throw new Error(AUTH_MESSAGE_CONSTANT.USERNAME_ALREADY_TAKEN);
+
+    const hashPassword = await new BcryptHelper().generateHashPassword(payload.password as string);
+
+    const user = await Auth.create({
+      password: hashPassword,
+      email: payload.email,
+      username: payload.username,
+    });
+
+    if (!user) throw new Error(AUTH_MESSAGE_CONSTANT.UNABLE_SIGNUP_USER);
+    // create this user to the user service
+
+    return user;
   }
 
-  public async login(reqBody: ILoginPayload) {
-    const user = await Auth.findOne({ email: reqBody.email });
+  public async login(payload: ILoginPayload) {
+    const user = await Auth.findOne({ email: payload.email }).select("password");
     if (!user) throw new Error(AUTH_MESSAGE_CONSTANT.INVALID_EMAIL_OR_PASSWORD);
 
-    const passwordMatched = await new BcryptHelper().verifyPassword(user.password, reqBody.password as string);
+    const passwordMatched = await new BcryptHelper().verifyPassword(user.password, payload.password as string);
     if (!passwordMatched) throw new Error(AUTH_MESSAGE_CONSTANT.INVALID_EMAIL_OR_PASSWORD);
 
     return user;
