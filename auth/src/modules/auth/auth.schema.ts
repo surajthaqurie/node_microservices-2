@@ -10,6 +10,14 @@ const authSchema = new mongoose.Schema(
       required: true,
       unique: true,
     },
+    username: {
+      type: String,
+      minlength: 5,
+      trim: true,
+      maxlength: 50,
+      required: true,
+      unique: true,
+    },
     password: {
       type: String,
       minlength: 6,

@@ -2,6 +2,7 @@ import { ILoginPayload, ISignupPayload } from "src/common/interface";
 import { AUTH_MESSAGE_CONSTANT } from "../../common/constant";
 import { Auth } from "./auth.schema";
 import { BcryptHelper } from "../../common/utils";
+import axios from "axios";
 
 export class AuthService {
   public async signup(payload: ISignupPayload) {
@@ -22,8 +23,24 @@ export class AuthService {
     });
 
     if (!user) throw new Error(AUTH_MESSAGE_CONSTANT.UNABLE_SIGNUP_USER);
-    // create this user to the user service
 
+    try {
+      const { data } = await axios.post("http://localhost:4000/api/v1/users", {
+        firstName: payload.firstName,
+        lastName: payload.lastName,
+        email: user.email,
+        username: user.username,
+        address: payload.address,
+      });
+
+      if (!data.success) {
+        await Auth.findByIdAndDelete(user._id);
+        throw new Error(data.message);
+      }
+    } catch (error) {
+      await Auth.findByIdAndDelete(user._id);
+      throw new Error(AUTH_MESSAGE_CONSTANT.UNABLE_SIGNUP_USER);
+    }
     return user;
   }
 
