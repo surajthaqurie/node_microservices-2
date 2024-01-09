@@ -1,3 +1,13 @@
+import { Document } from "mongoose";
+
+export interface IAuthDocument extends Document {
+  username: string;
+  email: string;
+  password: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export interface ILoginPayload {
   email: string;
   password?: string;

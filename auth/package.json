@@ -4,7 +4,7 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "test": "jest --watchAll --no-cache -c ./jest.config.ts",
+    "test": "jest --watchAll --no-cache --detectOpenHandles -c ./jest.config.ts",
     "test:coverage": "jest --coverage -c ./jest.config.ts",
     "dev": "ts-node-dev server.ts"
   },
