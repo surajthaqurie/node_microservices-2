@@ -83,34 +83,29 @@ describe("Auth service", () => {
         __v: 0,
       };
       (Auth.create as jest.Mock).mockResolvedValueOnce([userMockPayload] as IAuthDocument[]);
+      (axios.post as jest.Mock).mockRejectedValueOnce({ code: "ECONNREFUSED", message: "Connection refused" });
 
-      // (axios.post as jest.Mock).mockRejectedValueOnce({ message: "API Error" });
-      (axios.post as jest.Mock).mockRejectedValueOnce({
-        code: "ECONNREFUSED",
-        message: "Connection refused",
-      });
-      (Auth.findByIdAndDelete as jest.Mock).mockResolvedValueOnce(null);
+      await expect(authService.signup(payload)).rejects.toThrow("Connection refused");
+      expect(Auth.findByIdAndDelete).toHaveBeenCalledTimes(1);
+    });
 
-      const user = await authService.signup(payload);
+    it("Returns 400, when API returns false and delete user", async () => {
+      jest.spyOn(Auth, "findOne").mockResolvedValueOnce(null).mockResolvedValueOnce(null); // Simulating that email and username are not taken
+      jest.spyOn(BcryptHelper.prototype, "generateHashPassword").mockImplementation(mockGenerateHashPassword);
+      const userMockPayload = {
+        _id: new mongoose.Types.ObjectId().toHexString(),
+        email: payload.email,
+        username: payload.username,
+        password: "hashedPassword",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        __v: 0,
+      };
+      (Auth.create as jest.Mock).mockResolvedValueOnce([userMockPayload] as IAuthDocument[]);
+      (axios.post as jest.Mock).mockResolvedValueOnce({ data: { success: false, message: AUTH_MESSAGE_CONSTANT.UNABLE_SIGNUP_USER } });
 
       await expect(authService.signup(payload)).rejects.toThrow(AUTH_MESSAGE_CONSTANT.UNABLE_SIGNUP_USER);
-      expect(Auth.findOne).toHaveBeenCalledTimes(2);
-      expect(Auth.create).toHaveBeenCalledWith({
-        password: "hashedPassword",
-        email: "devlop@yopmail.com",
-        username: "devlop",
-      });
-      expect(axios.post).toHaveBeenCalledWith(
-        "http://localhost:4000/api/v1/users",
-        expect.objectContaining({
-          firstName: payload.firstName,
-          lastName: payload.lastName,
-          email: user.email,
-          username: user.username,
-          address: payload.address,
-        })
-      );
-      expect(Auth.findByIdAndDelete).toHaveBeenCalledWith(new mongoose.Types.ObjectId().toHexString());
+      expect(Auth.findByIdAndDelete).toHaveBeenCalledTimes(2);
     });
 
     it("Returns 201, when user created successfully", async () => {

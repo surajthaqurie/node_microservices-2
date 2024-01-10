@@ -39,7 +39,7 @@ export class AuthService {
       }
     } catch (error) {
       await Auth.findByIdAndDelete(user._id);
-      throw new Error(AUTH_MESSAGE_CONSTANT.UNABLE_SIGNUP_USER);
+      throw new Error(error.message);
     }
 
     return user;
