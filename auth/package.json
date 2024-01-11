@@ -4,8 +4,9 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "test": "jest --watchAll --no-cache --detectOpenHandles -c ./jest.config.ts",
+    "test": "pnpm clear_jest && jest --watchAll --no-cache --detectOpenHandles -c ./jest.config.ts",
     "test:coverage": "jest --coverage -c ./jest.config.ts",
+    "clear_jest": "jest --clearCache",
     "dev": "ts-node-dev server.ts"
   },
   "keywords": [],

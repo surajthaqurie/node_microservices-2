@@ -22,6 +22,7 @@ const payload: ISignupPayload = {
   confirmPassword: "password123",
   address: "KTM",
 };
+
 beforeEach(async () => {
   authService = new AuthService();
 });
@@ -33,17 +34,12 @@ afterEach(() => {
 describe("Auth service", () => {
   describe("Signup user", () => {
     it("Returns 400, when password and current password doesn't match each other", async () => {
-      const payload: ISignupPayload = {
-        firstName: "dev",
-        lastName: "lop",
-        email: "devlop@yopmail.com",
-        username: "devlop",
-        password: "password123",
-        confirmPassword: "mismatchedpassword",
-        address: "KTM",
-      };
-
-      await expect(authService.signup(payload)).rejects.toThrow(AUTH_MESSAGE_CONSTANT.PASSWORD_AND_CONFIRM_PASSWORD_NOT_MATCHED);
+      await expect(
+        authService.signup({
+          ...payload,
+          confirmPassword: "mismatchedpassword",
+        })
+      ).rejects.toThrow(AUTH_MESSAGE_CONSTANT.PASSWORD_AND_CONFIRM_PASSWORD_NOT_MATCHED);
     });
 
     it("Returns 409, when already taken email is used for create new user", async () => {
