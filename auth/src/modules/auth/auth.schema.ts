@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { IAuthDocument } from "../../common/interface";
 
 const authSchema = new mongoose.Schema(
   {
@@ -30,4 +31,4 @@ const authSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-export const Auth = mongoose.model("auth", authSchema);
+export const Auth = mongoose.model<IAuthDocument>("auth", authSchema);
