@@ -25,7 +25,9 @@ export class AuthService {
     if (!user) throw new Error(AUTH_MESSAGE_CONSTANT.UNABLE_SIGNUP_USER);
 
     try {
+      //TODO: Microservice EVENT with transaction
       const { data } = await axios.post("http://localhost:4000/api/v1/users", {
+        _id: user._id,
         firstName: payload.firstName,
         lastName: payload.lastName,
         email: user.email,
