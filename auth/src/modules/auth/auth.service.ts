@@ -48,11 +48,16 @@ export class AuthService {
   }
 
   public async login(payload: ILoginPayload) {
-    const user = await Auth.findOne({ email: payload.email }).select("password");
+    const user = await Auth.findOne({ email: payload.email }).select({
+      password: 1,
+      isDeleted: 1,
+    });
     if (!user) throw new Error(AUTH_MESSAGE_CONSTANT.INVALID_EMAIL_OR_PASSWORD);
 
     const passwordMatched = await new BcryptHelper().verifyPassword(user.password, payload.password as string);
     if (!passwordMatched) throw new Error(AUTH_MESSAGE_CONSTANT.INVALID_EMAIL_OR_PASSWORD);
+
+    if (user.isDeleted) throw new Error(AUTH_MESSAGE_CONSTANT.DISABLED_ACCOUNT);
 
     return user;
   }

@@ -4,6 +4,7 @@ export interface IAuthDocument extends Document {
   username: string;
   email: string;
   password: string;
+  isDeleted: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
