@@ -21,3 +21,8 @@ export interface ISignupPayload extends ILoginPayload {
   username: string;
   confirmPassword?: string;
 }
+
+export interface IUpdatePayload {
+  username: string;
+  email: string;
+}

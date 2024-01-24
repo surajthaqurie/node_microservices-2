@@ -64,8 +64,8 @@ export class UserService {
       };
     }
 
-    const enableDisableUser = await User.findByIdAndUpdate(id, { isDeleted: user.isDeleted ? false : true }, { new: true });
-    if (!enableDisableUser) {
+    const enableDisable = await User.findByIdAndUpdate(id, { isDeleted: user.isDeleted ? false : true }, { new: true });
+    if (!enableDisable) {
       return {
         success: false,
         message: user.isDeleted ? USER_MESSAGE_CONSTANT.UNABLE_TO_DISABLE_USER : USER_MESSAGE_CONSTANT.UNABLE_TO_ENABLE_USER,
@@ -73,8 +73,8 @@ export class UserService {
     }
 
     return {
-      message: enableDisableUser.isDeleted ? USER_MESSAGE_CONSTANT.USER_DISABLED_SUCCESSFULLY : USER_MESSAGE_CONSTANT.USER_ENABLED_SUCCESSFULLY,
-      data: enableDisableUser,
+      message: enableDisable.isDeleted ? USER_MESSAGE_CONSTANT.USER_DISABLED_SUCCESSFULLY : USER_MESSAGE_CONSTANT.USER_ENABLED_SUCCESSFULLY,
+      data: enableDisable,
     };
   }
 
