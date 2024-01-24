@@ -3,16 +3,13 @@ import { USER_MESSAGE_CONSTANT } from "../../common/constant";
 import User from "./user.schema";
 import { paginationQuery } from "src/common/utils";
 import axios from "axios";
+import { BadRequestError, ConflictRequestError, NotFoundError } from "@node_helper/error-handler";
 
 export class UserService {
   public async registerUser(payload: IUserRegisterPayload) {
     const user = await User.create(payload);
-    if (!user) {
-      return {
-        success: false,
-        message: USER_MESSAGE_CONSTANT.UNABLE_TO_CREATE_USER,
-      };
-    }
+    if (!user) throw new BadRequestError(USER_MESSAGE_CONSTANT.UNABLE_TO_CREATE_USER);
+
     return user;
   }
 
@@ -25,33 +22,24 @@ export class UserService {
 
   public async getUser(id: string) {
     const user = await User.findById(id);
-    if (!user) {
-      return {
-        success: false,
-        message: USER_MESSAGE_CONSTANT.USER_RECORD_NOT_FOUND,
-      };
-    }
+
+    if (!user) throw new NotFoundError(USER_MESSAGE_CONSTANT.USER_RECORD_NOT_FOUND);
 
     return user;
   }
 
   public async updateUser(id: string, payload: IUserUpdatePayload) {
     const user = await User.findById(id).select({ id: 1, email: 1, username: 1 });
-    if (!user) throw new Error(USER_MESSAGE_CONSTANT.USER_RECORD_NOT_FOUND);
+    if (!user) throw new NotFoundError(USER_MESSAGE_CONSTANT.USER_RECORD_NOT_FOUND);
 
     const taken_email = await User.findOne({ email: payload.email }).select(id);
-    if (taken_email && taken_email.id !== user.id) throw new Error(USER_MESSAGE_CONSTANT.EMAIL_ALREADY_TAKEN);
+    if (taken_email && taken_email.id !== user.id) throw new ConflictRequestError(USER_MESSAGE_CONSTANT.EMAIL_ALREADY_TAKEN);
 
     const taken_username = await User.findOne({ username: payload.username }).select(id);
-    if (taken_username && taken_username.id !== user.id) throw new Error(USER_MESSAGE_CONSTANT.USERNAME_ALREADY_TAKEN);
+    if (taken_username && taken_username.id !== user.id) throw new ConflictRequestError(USER_MESSAGE_CONSTANT.USERNAME_ALREADY_TAKEN);
 
     const updateUser = await User.findByIdAndUpdate(id, payload, { new: true });
-    if (!updateUser) {
-      return {
-        success: false,
-        message: USER_MESSAGE_CONSTANT.USER_RECORD_NOT_FOUND,
-      };
-    }
+    if (!updateUser) throw new BadRequestError(USER_MESSAGE_CONSTANT.UNABLE_TO_UPDATE_USER);
 
     if (user.email !== payload.email || user.username !== payload.username) {
       try {
@@ -60,10 +48,10 @@ export class UserService {
           username: updateUser.username,
         });
         if (!data.success) {
-          throw new Error(data.message);
+          throw new BadRequestError(data.message);
         }
       } catch (error) {
-        throw new Error(error.message);
+        throw new BadRequestError(error.message);
       }
     }
 
@@ -72,29 +60,20 @@ export class UserService {
 
   public async enableDisableUser(id: string) {
     const user = await User.findById(id);
-    if (!user) {
-      return {
-        success: false,
-        message: USER_MESSAGE_CONSTANT.USER_RECORD_NOT_FOUND,
-      };
-    }
+    if (!user) throw new NotFoundError(USER_MESSAGE_CONSTANT.USER_RECORD_NOT_FOUND);
 
     const enableDisable = await User.findByIdAndUpdate(id, { isDeleted: user.isDeleted ? false : true }, { new: true });
 
-    if (!enableDisable) {
-      return {
-        success: false,
-        message: user.isDeleted ? USER_MESSAGE_CONSTANT.UNABLE_TO_DISABLE_USER : USER_MESSAGE_CONSTANT.UNABLE_TO_ENABLE_USER,
-      };
-    }
+    if (!enableDisable)
+      throw new BadRequestError(user.isDeleted ? USER_MESSAGE_CONSTANT.UNABLE_TO_DISABLE_USER : USER_MESSAGE_CONSTANT.UNABLE_TO_ENABLE_USER);
 
     try {
       const { data } = await axios.patch(`http://localhost:4001/api/v1/auth/enable-disable/${id}`);
       if (!data.success) {
-        throw new Error(data.message);
+        throw new BadRequestError(data.message);
       }
     } catch (error) {
-      throw new Error(error.message);
+      throw new BadRequestError(error.message);
     }
 
     return {
@@ -105,20 +84,15 @@ export class UserService {
 
   public async deleteUser(id: string) {
     const user = await User.findByIdAndDelete(id);
-    if (!user) {
-      return {
-        success: false,
-        message: USER_MESSAGE_CONSTANT.UNABLE_TO_DELETE_USER,
-      };
-    }
+    if (!user) throw new NotFoundError(USER_MESSAGE_CONSTANT.USER_RECORD_NOT_FOUND);
 
     try {
       const { data } = await axios.delete(`http://localhost:4001/api/v1/auth/${id}`);
       if (!data.success) {
-        throw new Error(data.message);
+        throw new BadRequestError(data.message);
       }
     } catch (error) {
-      throw new Error(error.message);
+      throw new BadRequestError(error.message);
     }
 
     return user;
