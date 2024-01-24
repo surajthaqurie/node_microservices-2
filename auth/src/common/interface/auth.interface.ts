@@ -4,6 +4,7 @@ export interface IAuthDocument extends Document {
   username: string;
   email: string;
   password: string;
+  isDeleted: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -19,4 +20,9 @@ export interface ISignupPayload extends ILoginPayload {
   address: string;
   username: string;
   confirmPassword?: string;
+}
+
+export interface IUpdatePayload {
+  username: string;
+  email: string;
 }

@@ -22,6 +22,10 @@ const authSchema = new mongoose.Schema(
       required: true,
       select: false,
     },
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );

@@ -1,6 +1,6 @@
 import Joi from "joi";
 import { AUTH_PAYLOAD_VALIDATION_MESSAGE_CONSTANT } from "../../common/constant";
-import { ILoginPayload, ISignupPayload } from "src/common/interface";
+import { ILoginPayload, ISignupPayload, IUpdatePayload } from "src/common/interface";
 
 export const loginValidation = (data: ILoginPayload): Joi.ValidationResult<ILoginPayload> => {
   const schema = Joi.object<ILoginPayload, true>({
@@ -17,7 +17,7 @@ export const loginValidation = (data: ILoginPayload): Joi.ValidationResult<ILogi
   return schema.validate(data);
 };
 
-export const signupValidation = (data: ISignupPayload) => {
+export const signupValidation = (data: ISignupPayload): Joi.ValidationResult<ISignupPayload> => {
   const schema = Joi.object<ISignupPayload, true>({
     firstName: Joi.string().trim().required().messages({
       "string.base": AUTH_PAYLOAD_VALIDATION_MESSAGE_CONSTANT.FIRST_NAME_MUST_BE_STRING,
@@ -46,6 +46,21 @@ export const signupValidation = (data: ISignupPayload) => {
     address: Joi.string().trim().required().messages({
       "string.base": AUTH_PAYLOAD_VALIDATION_MESSAGE_CONSTANT.ADDRESS_PASSWORD_MUST_BE_STRING,
       "any.required": AUTH_PAYLOAD_VALIDATION_MESSAGE_CONSTANT.ADDRESS_PASSWORD_MUST_BE_STRING,
+    }),
+  }).options({ abortEarly: false });
+
+  return schema.validate(data);
+};
+
+export const updateValidation = (data: IUpdatePayload): Joi.ValidationResult<IUpdatePayload> => {
+  const schema = Joi.object<IUpdatePayload, true>({
+    email: Joi.string().email().lowercase().trim().required().messages({
+      "string.base": AUTH_PAYLOAD_VALIDATION_MESSAGE_CONSTANT.EMAIL_MUST_BE_STRING,
+      "any.required": AUTH_PAYLOAD_VALIDATION_MESSAGE_CONSTANT.EMAIL_MUST_BE_REQUIRED,
+    }),
+    username: Joi.string().lowercase().trim().required().messages({
+      "string.base": AUTH_PAYLOAD_VALIDATION_MESSAGE_CONSTANT.USERNAME_MUST_BE_STRING,
+      "any.required": AUTH_PAYLOAD_VALIDATION_MESSAGE_CONSTANT.USERNAME_MUST_BE_REQUIRED,
     }),
   }).options({ abortEarly: false });
 
