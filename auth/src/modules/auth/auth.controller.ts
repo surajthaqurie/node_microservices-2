@@ -5,22 +5,20 @@ import { AUTH_MESSAGE_CONSTANT } from "../../common/constant";
 import { BadRequestResponse } from "@node_helper/error-handler";
 export class AuthController {
   public async signup(req: Request, res: Response, next: NextFunction) {
-    const { error, value } = signupValidation(req.body);
-    if (error) {
-      return res.status(400).json({
-        success: false,
-        message: error,
-        data: null,
+    try {
+      const { error, value } = signupValidation(req.body);
+      if (error) throw new BadRequestResponse(error.details[0].message);
+
+      const user = await new AuthService().signup(value);
+
+      return res.status(201).json({
+        success: true,
+        message: AUTH_MESSAGE_CONSTANT.USER_CREATED_SUCCESSFULLY,
+        data: user,
       });
+    } catch (error) {
+      return next(error);
     }
-
-    const user = await new AuthService().signup(value);
-
-    return res.status(201).json({
-      success: true,
-      message: AUTH_MESSAGE_CONSTANT.USER_CREATED_SUCCESSFULLY,
-      data: user,
-    });
   }
 
   public async login(req: Request, res: Response, next: NextFunction) {

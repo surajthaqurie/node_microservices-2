@@ -5,6 +5,9 @@ settings:
   excludeLinksFromLockfile: false
 
 dependencies:
+  '@node_helper/error-handler':
+    specifier: ^1.0.4
+    version: 1.0.4
   axios:
     specifier: ^1.6.5
     version: 1.6.5
@@ -95,6 +98,14 @@ packages:
     resolution: {integrity: sha512-t7c5K033joZZMspnHg/gWPE4kandgc2OxE74aYOtGKfgB9VPuVJPix0H6fhmm2erj5PBJ21mqcx34lpIGtUCsQ==}
     dependencies:
       sparse-bitfield: 3.0.3
+    dev: false
+
+  /@node_helper/error-handler@1.0.4:
+    resolution: {integrity: sha512-52E2GT7Q3IvKTS3eEipJXtZqsSR2sro31e7vSvXJFXWOvP/X06ApIC0wq0Lx8abeWI9zCfiK1D8eN3d0PQR3iA==}
+    dependencies:
+      express: 4.18.2
+    transitivePeerDependencies:
+      - supports-color
     dev: false
 
   /@sideway/address@4.1.4:
