@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { AuthService } from "./auth.service";
 import { loginValidation, signupValidation, updateValidation } from "./auth.validation";
 import { AUTH_MESSAGE_CONSTANT } from "../../common/constant";
-
+import { BadRequestResponse } from "@node_helper/error-handler";
 export class AuthController {
   public async signup(req: Request, res: Response, next: NextFunction) {
     const { error, value } = signupValidation(req.body);
@@ -24,58 +24,63 @@ export class AuthController {
   }
 
   public async login(req: Request, res: Response, next: NextFunction) {
-    const { error, value } = loginValidation(req.body);
-    if (error) {
+    try {
+      const { error, value } = loginValidation(req.body);
+      if (error) throw new BadRequestResponse(error.details[0].message);
+
+      const user = await new AuthService().login(value);
+
       return res.status(200).json({
         success: true,
-        data: error,
+        data: user,
       });
+    } catch (error) {
+      return next(error);
     }
-
-    const user = await new AuthService().login(value);
-
-    return res.status(200).json({
-      success: true,
-      data: user,
-    });
   }
 
   async updateUser(req: Request, res: Response, next: NextFunction) {
-    const userId = req.params.id;
-    const { error, value } = updateValidation(req.body);
-    if (error) {
-      return res.status(400).json({
-        success: false,
-        message: error,
-        data: null,
-      });
-    }
+    try {
+      const userId = req.params.id;
+      const { error, value } = updateValidation(req.body);
+      if (error) throw new BadRequestResponse(error.details[0].message);
 
-    const user = await new AuthService().updateUser(userId, value);
-    return res.status(201).json({
-      success: true,
-      message: AUTH_MESSAGE_CONSTANT.USER_CREATED_SUCCESSFULLY,
-      data: user,
-    });
+      const user = await new AuthService().updateUser(userId, value);
+      return res.status(201).json({
+        success: true,
+        message: AUTH_MESSAGE_CONSTANT.USER_CREATED_SUCCESSFULLY,
+        data: user,
+      });
+    } catch (error) {
+      return next(error);
+    }
   }
 
   public async enableDisableUser(req: Request, res: Response, next: NextFunction) {
-    const userId = req.params.id;
-    const user = await new AuthService().enableDisableUser(userId);
+    try {
+      const userId = req.params.id;
+      const user = await new AuthService().enableDisableUser(userId);
 
-    return res.status(200).json({
-      success: true,
-      data: user,
-    });
+      return res.status(200).json({
+        success: true,
+        data: user,
+      });
+    } catch (error) {
+      return next(error);
+    }
   }
 
   public async deleteUser(req: Request, res: Response, next: NextFunction) {
-    const userId = req.params.id;
-    const user = await new AuthService().deleteUser(userId);
+    try {
+      const userId = req.params.id;
+      const user = await new AuthService().deleteUser(userId);
 
-    return res.status(200).json({
-      success: true,
-      data: user,
-    });
+      return res.status(200).json({
+        success: true,
+        data: user,
+      });
+    } catch (error) {
+      return next(error);
+    }
   }
 }

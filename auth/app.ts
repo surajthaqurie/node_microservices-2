@@ -6,7 +6,7 @@ import path from "path";
 
 import appRouter from "./src/routes";
 import { DbConnection } from "./src/common/utils";
-
+import { errorHandler } from "@node_helper/error-handler";
 class App {
   public app: express.Application;
 
@@ -39,5 +39,6 @@ class App {
 }
 
 const app = new App().app;
+app.use(errorHandler);
 
 export default app;
