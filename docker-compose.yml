@@ -1,0 +1,89 @@
+version: "3"
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    container_name: kafka-zookeeper
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_SERVER_ID: 1
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+
+  # kafka brokers
+  kafka_broker_1:
+    image: confluentinc/cp-kafka:latest
+    container_name: kafka_broker_1
+    ports:
+      - "29092:9092"
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 1
+      # KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+
+      # Name of zookeeper where broker should connect
+      KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
+      # Mapping between listener names and the security protocols they use
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
+      # INTERNAL: inside and EXTERNAL: outside
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka_broker_1:9092,EXTERNAL://localhost:29092
+      # Communication between different Kafka brokers in a cluster
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      # For logger
+      KAFKA_LOG4J_LOGGERS: "kafka.controller=INFO,kafka.producer.async.DefaultEventHandler=INFO,state.change.logger=INFO"
+      # Replication Topic on the all brokers(no of brokers -1)
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 2
+
+  kafka_broker_2:
+    image: confluentinc/cp-kafka:latest
+    container_name: kafka_broker_2
+    ports:
+      - "39093:9093"
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 2
+      # KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka_broker_2:9093,EXTERNAL://localhost:39093
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_LOG4J_LOGGERS: "kafka.controller=INFO,kafka.producer.async.DefaultEventHandler=INFO,state.change.logger=INFO"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 2
+
+  kafka_broker_3:
+    image: confluentinc/cp-kafka:latest
+    container_name: kafka_broker_3
+    ports:
+      - "49094:9094"
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 3
+      # KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka_broker_3:9094,EXTERNAL://localhost:49094
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_LOG4J_LOGGERS: "kafka.controller=INFO,kafka.producer.async.DefaultEventHandler=INFO,state.change.logger=INFO"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 2
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    depends_on:
+      - kafka_broker_1
+      - kafka_broker_2
+      - kafka_broker_3
+    ports:
+      - 8090:8080
+    environment:
+      KAFKA_CLUSTERS_0_NAME: kafka_broker_1
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka_broker_1:29092
+      KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
+      KAFKA_CLUSTERS_1_NAME: kafka_broker_2
+      KAFKA_CLUSTERS_1_BOOTSTRAPSERVERS: kafka_broker_2:39093
+      KAFKA_CLUSTERS_2_ZOOKEEPER: zookeeper:2181
+      KAFKA_CLUSTERS_3_NAME: kafka_broker_3
+      KAFKA_CLUSTERS_3_BOOTSTRAPSERVERS: kafka_broker_3:49094
+      KAFKA_CLUSTERS_3_ZOOKEEPER: zookeeper:2181
