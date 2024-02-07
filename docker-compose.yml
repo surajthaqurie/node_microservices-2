@@ -9,6 +9,8 @@ services:
       ZOOKEEPER_SERVER_ID: 1
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
+    networks:
+      - kafka-network
 
   # kafka brokers
   kafka_broker_1:
@@ -35,6 +37,8 @@ services:
       KAFKA_LOG4J_LOGGERS: "kafka.controller=INFO,kafka.producer.async.DefaultEventHandler=INFO,state.change.logger=INFO"
       # Replication Topic on the all brokers(no of brokers -1)
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 2
+    networks:
+      - kafka-network
 
   kafka_broker_2:
     image: confluentinc/cp-kafka:latest
@@ -43,6 +47,7 @@ services:
       - "39093:9093"
     depends_on:
       - zookeeper
+      - kafka_broker_1 # For docker netwoek IPV4 consistency
     environment:
       KAFKA_BROKER_ID: 2
       # KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
@@ -52,6 +57,8 @@ services:
       KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
       KAFKA_LOG4J_LOGGERS: "kafka.controller=INFO,kafka.producer.async.DefaultEventHandler=INFO,state.change.logger=INFO"
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 2
+    networks:
+      - kafka-network
 
   kafka_broker_3:
     image: confluentinc/cp-kafka:latest
@@ -60,6 +67,7 @@ services:
       - "49094:9094"
     depends_on:
       - zookeeper
+      - kafka_broker_2 # For docker netwoek IPV4 consistency
     environment:
       KAFKA_BROKER_ID: 3
       # KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
@@ -69,6 +77,8 @@ services:
       KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
       KAFKA_LOG4J_LOGGERS: "kafka.controller=INFO,kafka.producer.async.DefaultEventHandler=INFO,state.change.logger=INFO"
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 2
+    networks:
+      - kafka-network
 
   kafka_ui:
     image: provectuslabs/kafka-ui:latest
@@ -81,3 +91,13 @@ services:
       - 8090:8080
     environment:
       DYNAMIC_CONFIG_ENABLED: true
+    networks:
+      - kafka-network
+
+networks:
+  kafka-network:
+    driver: bridge
+    name: kafka-network
+    ipam:
+      config:
+        - subnet: "172.20.0.0/24"

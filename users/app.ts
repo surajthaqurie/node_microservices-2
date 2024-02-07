@@ -5,7 +5,7 @@ import helmet from "helmet";
 import path from "path";
 
 import appRouter from "./src/routes";
-import { DbConnection } from "./src/common/utils";
+import { DbConnection, KafkaConfig } from "./src/common/utils";
 import { errorHandler } from "@node_helper/error-handler";
 
 class App {
@@ -41,5 +41,21 @@ class App {
 
 const app = new App().app;
 app.use(errorHandler);
+
+(async () => {
+  const kafkaConfig = new KafkaConfig("user-service");
+
+  try {
+    // Connect to Kafka brokers
+    await kafkaConfig.connect();
+
+    // Consume messages from a Kafka topic
+    const topic = "your-topic";
+    await kafkaConfig.consume(topic);
+  } finally {
+    // Disconnect from Kafka brokers
+    await kafkaConfig.disconnect();
+  }
+})();
 
 export default app;

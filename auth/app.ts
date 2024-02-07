@@ -5,7 +5,7 @@ import helmet from "helmet";
 import path from "path";
 
 import appRouter from "./src/routes";
-import { DbConnection } from "./src/common/utils";
+import { DbConnection, KafkaConfig } from "./src/common/utils";
 import { errorHandler } from "@node_helper/error-handler";
 class App {
   public app: express.Application;
@@ -37,6 +37,23 @@ class App {
     new DbConnection().connect();
   }
 }
+
+(async () => {
+  const kafkaConfig = new KafkaConfig("AuthService");
+
+  try {
+    // Connect to Kafka brokers
+    // Produce messages to a Kafka topic
+    const topic = "your-topic";
+    const messages = [
+      { key: "key1", value: "message1" },
+      { key: "key2", value: "message2" },
+    ];
+    await kafkaConfig.produce(topic, messages);
+  } finally {
+    // Disconnect from Kafka brokers
+  }
+})();
 
 const app = new App().app;
 app.use(errorHandler);
