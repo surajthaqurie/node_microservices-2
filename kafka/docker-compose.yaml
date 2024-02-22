@@ -1,0 +1,134 @@
+version: "3.7"
+services:
+  zookeeper:
+    container_name: zookeeper
+    image: confluentinc/cp-zookeeper:7.0.1
+    user: root
+    ports:
+      - "2185:2181"
+    environment:
+      - ZOOKEEPER_CLIENT_PORT=2181
+    volumes:
+      - "./storage/zookeeper/data:/var/lib/zookeeper/data"
+      - "./storage/zookeeper/log:/var/lib/zookeeper/log"
+      - "./storage/zookeeper/secrets:/var/lib/zookeeper/secrets"
+    networks:
+      - kafka_network
+
+  kafka_1:
+    container_name: kafka_1
+    image: confluentinc/cp-kafka:7.0.1
+    user: root
+    ports:
+      - "9092:9092"
+      - "9093:9093"
+    environment:
+      - KAFKA_BROKER_ID=1
+      - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
+      - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
+      - KAFKA_ADVERTISED_LISTENERS=INTERNAL://kafka_1:9092,EXTERNAL://localhost:9093
+      - KAFKA_LISTENERS=INTERNAL://0.0.0.0:9092,EXTERNAL://0.0.0.0:9093
+      - KAFKA_INTER_BROKER_LISTENER_NAME=INTERNAL
+      - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=3
+    restart: always
+    depends_on:
+      - zookeeper
+    volumes:
+      - "./storage/kafka/data_1:/var/lib/kafka/data"
+      - "./storage/kafka/secrets_1:/var/lib/kafka/secrets"
+    networks:
+      - kafka_network
+
+  kafka_2:
+    container_name: kafka_2
+    image: confluentinc/cp-kafka:7.0.1
+    user: root
+    ports:
+      - "9094:9094"
+      - "9095:9095"
+    environment:
+      - KAFKA_BROKER_ID=2
+      - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
+      - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
+      - KAFKA_ADVERTISED_LISTENERS=INTERNAL://kafka_2:9094,EXTERNAL://localhost:9095
+      - KAFKA_LISTENERS=INTERNAL://0.0.0.0:9094,EXTERNAL://0.0.0.0:9095
+      - KAFKA_INTER_BROKER_LISTENER_NAME=INTERNAL
+      - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=3
+    restart: always
+    depends_on:
+      - zookeeper
+    volumes:
+      - "./storage/kafka/data_2:/var/lib/kafka/data"
+      - "./storage/kafka/secrets_2:/var/lib/kafka/secrets"
+    networks:
+      - kafka_network
+
+  kafka_3:
+    container_name: kafka_3
+    image: confluentinc/cp-kafka:7.0.1
+    user: root
+    ports:
+      - "9096:9096"
+      - "9097:9097"
+    environment:
+      - KAFKA_BROKER_ID=3
+      - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
+      - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
+      - KAFKA_ADVERTISED_LISTENERS=INTERNAL://kafka_3:9096,EXTERNAL://localhost:9097
+      - KAFKA_LISTENERS=INTERNAL://0.0.0.0:9096,EXTERNAL://0.0.0.0:9097
+      - KAFKA_INTER_BROKER_LISTENER_NAME=INTERNAL
+      - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=3
+    restart: always
+    depends_on:
+      - zookeeper
+    volumes:
+      - "./storage/kafka/data_3:/var/lib/kafka/data"
+      - "./storage/kafka/secrets_3:/var/lib/kafka/secrets"
+    networks:
+      - kafka_network
+
+  kowl:
+    container_name: kowl
+    image: quay.io/cloudhut/kowl:v1.4.0
+    user: root
+    restart: on-failure
+    volumes:
+      - ./config.yaml:/etc/kowl/config.yaml
+    networks:
+      - kafka_network
+    ports:
+      - "8089:8080"
+    entrypoint: ./kowl --config.filepath=/etc/kowl/config.yaml
+    depends_on:
+      - zookeeper
+      - kafka_1
+      - kafka_2
+      - kafka_3
+
+  # kafka-ui:
+  #   container_name: kafka-ui
+  #   image: provectuslabs/kafka-ui:latest
+  #   restart: on-failure
+  #   ports:
+  #     - 8080:8080
+  #   depends_on:
+  #     - zookeeper
+  #     - kafka_1
+  #     - kafka_2
+  #     - kafka_3
+  #   environment:
+  #     KAFKA_CLUSTERS_0_NAME: local
+  #     KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka_1:29092
+  #     KAFKA_CLUSTERS_0_METRICS_PORT: 9997
+  #     KAFKA_CLUSTERS_0_SCHEMAREGISTRY: http://schemaregistry0:8085
+  #     KAFKA_CLUSTERS_0_KAFKACONNECT_0_NAME: first
+  #     KAFKA_CLUSTERS_0_KAFKACONNECT_0_ADDRESS: http://kafka-connect0:8083
+  #     KAFKA_CLUSTERS_1_NAME: secondLocal
+  #     KAFKA_CLUSTERS_1_BOOTSTRAPSERVERS: kafka_1:29092
+  #     KAFKA_CLUSTERS_1_METRICS_PORT: 9998
+  #     KAFKA_CLUSTERS_1_SCHEMAREGISTRY: http://schemaregistry1:8085
+  #     DYNAMIC_CONFIG_ENABLED: "true"
+networks:
+  kafka_network:
+    name: pub_sub_network
+    external: true

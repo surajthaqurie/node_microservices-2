@@ -1,0 +1,8 @@
+# See: https://github.com/cloudhut/kowl/tree/master/docs/config for reference config files.
+kafka:
+  brokers:
+    - kafka_1:9092
+    - kafka_2:9094
+    - kafka_3:9096
+# server:
+# listenPort: 8080

@@ -37,6 +37,12 @@ export class AuthController {
     }
   }
 
+  test(req: Request, res: Response, next: NextFunction) {
+    res.status(200).json({
+      message: "test",
+    });
+  }
+
   async updateUser(req: Request, res: Response, next: NextFunction) {
     try {
       const userId = req.params.id;

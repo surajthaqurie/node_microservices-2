@@ -17,7 +17,8 @@ services:
     image: confluentinc/cp-kafka:latest
     container_name: kafka_broker_1
     ports:
-      - "29092:9092"
+      - "9091:9091"
+      - "9092:9092"
     depends_on:
       - zookeeper
     environment:
@@ -30,7 +31,7 @@ services:
       # Mapping between listener names and the security protocols they use
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
       # INTERNAL: inside and EXTERNAL: outside
-      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka_broker_1:9092,EXTERNAL://localhost:29092
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka_broker_1:9091,EXTERNAL://localhost:9092
       # Communication between different Kafka brokers in a cluster
       KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
       # For logger
@@ -44,7 +45,7 @@ services:
     image: confluentinc/cp-kafka:latest
     container_name: kafka_broker_2
     ports:
-      - "39093:9093"
+      - "9093:9093"
     depends_on:
       - zookeeper
       - kafka_broker_1 # For docker netwoek IPV4 consistency
@@ -64,7 +65,9 @@ services:
     image: confluentinc/cp-kafka:latest
     container_name: kafka_broker_3
     ports:
-      - "49094:9094"
+      - "9094:9094"
+      - "9093:9093"
+
     depends_on:
       - zookeeper
       - kafka_broker_2 # For docker netwoek IPV4 consistency
@@ -73,7 +76,7 @@ services:
       # KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
       KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
-      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka_broker_3:9094,EXTERNAL://localhost:49094
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka_broker_3:9093,EXTERNAL://localhost:9094
       KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
       KAFKA_LOG4J_LOGGERS: "kafka.controller=INFO,kafka.producer.async.DefaultEventHandler=INFO,state.change.logger=INFO"
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 2
@@ -96,6 +99,7 @@ services:
 
 networks:
   kafka-network:
+    external: true
     driver: bridge
     name: kafka-network
     ipam:

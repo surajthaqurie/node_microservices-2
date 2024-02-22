@@ -2,13 +2,13 @@ import { Consumer, Kafka, Message, Partitioners, Producer } from "kafkajs";
 
 export class KafkaConfig {
   // docker network inspect <network name>
-  brokers: string[] = ["172.20.0.3:29092", "172.20.0.4:39093", "172.20.0.5:49094"];
+  brokers: string[] = ["localhost:9093"];
   private producer: Producer;
   private consumer: Consumer;
 
   constructor(groupId: string) {
     const kafka = new Kafka({
-      clientId: "node-microservice",
+      clientId: "users",
       brokers: this.brokers,
       connectionTimeout: 3000, // Example adjustment
       requestTimeout: 3000, // Increase the timeout value (in milliseconds)
