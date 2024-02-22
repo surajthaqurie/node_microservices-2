@@ -8,11 +8,16 @@ export class KafkaConfig {
 
   constructor(groupId: string) {
     const kafka = new Kafka({
-      clientId: "authService",
+      clientId: "node-microservice",
       brokers: this.brokers,
+      requestTimeout: 3000, // Increase the timeout value (in milliseconds)
+      retry: {
+        initialRetryTime: 100, // Initial retry delay (in milliseconds)
+        retries: 10, // Maximum number of retries
+      },
     });
 
-    this.producer = kafka.producer({ createPartitioner: Partitioners.DefaultPartitioner });
+    this.producer = kafka.producer({ createPartitioner: Partitioners.LegacyPartitioner });
     this.consumer = kafka.consumer({ groupId });
   }
 

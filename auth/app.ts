@@ -39,19 +39,25 @@ class App {
 }
 
 (async () => {
-  const kafkaConfig = new KafkaConfig("AuthService");
-
   try {
-    // Connect to Kafka brokers
-    // Produce messages to a Kafka topic
+    const kafkaConfig = new KafkaConfig("AuthService");
     const topic = "your-topic";
+
+    const value = JSON.stringify({
+      firstName: "payload.firstName",
+      address: "payload.address",
+    });
+
     const messages = [
-      { key: "key1", value: "message1" },
-      { key: "key2", value: "message2" },
+      {
+        key: "USER_CREATED",
+        value,
+      },
     ];
+
     await kafkaConfig.produce(topic, messages);
-  } finally {
-    // Disconnect from Kafka brokers
+  } catch (error) {
+    console.error("Producer error:", error);
   }
 })();
 

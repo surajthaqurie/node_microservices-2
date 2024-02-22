@@ -39,23 +39,21 @@ class App {
   }
 }
 
-const app = new App().app;
-app.use(errorHandler);
-
 (async () => {
-  const kafkaConfig = new KafkaConfig("user-service");
-
   try {
-    // Connect to Kafka brokers
-    await kafkaConfig.connect();
-
-    // Consume messages from a Kafka topic
+    const kafkaConfig = new KafkaConfig("AuthService");
     const topic = "your-topic";
-    await kafkaConfig.consume(topic);
-  } finally {
-    // Disconnect from Kafka brokers
-    await kafkaConfig.disconnect();
+
+    await kafkaConfig.consume(topic, (value: string) => {
+      // Handle the consumed value here
+      console.log(`Received message: ${value}`);
+    });
+  } catch (error) {
+    console.error("consumed error:", error);
   }
 })();
+
+const app = new App().app;
+app.use(errorHandler);
 
 export default app;
