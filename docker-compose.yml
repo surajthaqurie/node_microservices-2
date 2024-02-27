@@ -117,6 +117,18 @@ services:
     networks:
       - kafka_network
 
+  mongo:
+    container_name: mongo
+    image: mongo
+    restart: always
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+    networks:
+      - kafka_network
+
 networks:
   kafka_network:
     # name: pub_sub_network

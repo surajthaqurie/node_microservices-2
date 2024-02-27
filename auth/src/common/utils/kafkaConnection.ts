@@ -5,7 +5,7 @@ export class KafkaConfig {
   private consumer: Consumer;
 
   constructor(groupId: string) {
-    const KAFKA_BROKER_IDS = process.env.KAFKA_BROKER_IDS;
+    const KAFKA_BROKER_IDS = process.env.KAFKA_BROKER_IDS || "localhost:9093";
     if (!KAFKA_BROKER_IDS) throw new Error("KAFKA_BROKER_IDS is required on .env");
 
     const kafka = new Kafka({
