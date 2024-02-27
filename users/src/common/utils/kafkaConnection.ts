@@ -1,21 +1,21 @@
 import { Consumer, Kafka, Message, Partitioners, Producer } from "kafkajs";
 
 export class KafkaConfig {
-  // docker network inspect <network name>
-  brokers: string[] = ["localhost:9093"];
   private producer: Producer;
   private consumer: Consumer;
 
   constructor(groupId: string) {
+    const KAFKA_BROKER_IDS = process.env.KAFKA_BROKER_IDS;
+    if (!KAFKA_BROKER_IDS) throw new Error("KAFKA_BROKER_IDS is required on .env");
+
     const kafka = new Kafka({
-      clientId: "users",
-      brokers: this.brokers,
-      connectionTimeout: 3000, // Example adjustment
-      requestTimeout: 3000, // Increase the timeout value (in milliseconds)
-      retry: {
-        initialRetryTime: 100, // Initial retry delay (in milliseconds)
-        retries: 10, // Maximum number of retries
-      },
+      clientId: "node-microservice",
+      brokers: KAFKA_BROKER_IDS.split(","),
+      // requestTimeout: 3000, // Increase the timeout value (in milliseconds)
+      // retry: {
+      //   initialRetryTime: 100, // Initial retry delay (in milliseconds)
+      //   retries: 10, // Maximum number of retries
+      // },
     });
 
     this.producer = kafka.producer({ createPartitioner: Partitioners.LegacyPartitioner });
@@ -44,15 +44,10 @@ export class KafkaConfig {
 
       await this.consumer.run({
         eachMessage: async ({ topic, partition, message }) => {
-          try {
-            const value = message.value?.toString();
-            console.log({ value });
-            callback(value);
-          } catch (error) {
-            console.error("Error in consumer callback:", error);
-          }
+          const value = message.value?.toString();
+          console.log("----------------->", { value });
+          callback(value);
         },
-        eachBatchAutoResolve: true,
       });
     } catch (error) {
       console.log(error);

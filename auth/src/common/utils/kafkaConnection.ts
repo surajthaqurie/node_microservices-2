@@ -1,20 +1,21 @@
 import { Consumer, Kafka, Message, Partitioners, Producer } from "kafkajs";
 
 export class KafkaConfig {
-  // docker network inspect <network name>
-  brokers: string[] = ["localhost:9093"];
   private producer: Producer;
   private consumer: Consumer;
 
   constructor(groupId: string) {
+    const KAFKA_BROKER_IDS = process.env.KAFKA_BROKER_IDS;
+    if (!KAFKA_BROKER_IDS) throw new Error("KAFKA_BROKER_IDS is required on .env");
+
     const kafka = new Kafka({
       clientId: "node-microservice",
-      brokers: this.brokers,
-      requestTimeout: 3000, // Increase the timeout value (in milliseconds)
-      retry: {
-        initialRetryTime: 100, // Initial retry delay (in milliseconds)
-        retries: 10, // Maximum number of retries
-      },
+      brokers: KAFKA_BROKER_IDS.split(","),
+      // requestTimeout: 3000, // Increase the timeout value (in milliseconds)
+      // retry: {
+      //   initialRetryTime: 100, // Initial retry delay (in milliseconds)
+      //   retries: 10, // Maximum number of retries
+      // },
     });
 
     this.producer = kafka.producer({ createPartitioner: Partitioners.LegacyPartitioner });

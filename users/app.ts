@@ -54,6 +54,7 @@ class App {
 })();
 
 const app = new App().app;
+
 app.use(errorHandler);
 
 export default app;
