@@ -3,3 +3,5 @@ coverage
 
 .env
 kafka/storage
+
+todo.txt

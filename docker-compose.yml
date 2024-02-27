@@ -37,7 +37,7 @@ services:
       # Communication between different Kafka brokers in a cluster
       - KAFKA_INTER_BROKER_LISTENER_NAME=INTERNAL
       # For logger
-      # - KAFKA_LOG4J_LOGGERS= "kafka.controller=INFO,kafka.producer.async.DefaultEventHandler=INFO,state.change.logger=INFO"
+      - KAFKA_LOG4J_LOGGERS= "kafka.controller=INFO,kafka.producer.async.DefaultEventHandler=INFO,state.change.logger=INFO"
       # Replication Topic on the all brokers(no of brokers -1)
       - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=2
 
@@ -64,7 +64,7 @@ services:
       - KAFKA_ADVERTISED_LISTENERS=INTERNAL://kafka_broker_2:9094,EXTERNAL://localhost:9095
       - KAFKA_LISTENERS=INTERNAL://0.0.0.0:9094,EXTERNAL://0.0.0.0:9095
       - KAFKA_INTER_BROKER_LISTENER_NAME=INTERNAL
-      # - KAFKA_LOG4J_LOGGERS= "kafka.controller=INFO,kafka.producer.async.DefaultEventHandler=INFO,state.change.logger=INFO"
+      - KAFKA_LOG4J_LOGGERS= "kafka.controller=INFO,kafka.producer.async.DefaultEventHandler=INFO,state.change.logger=INFO"
       - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=2
     # restart: always
     depends_on:
@@ -89,7 +89,7 @@ services:
       - KAFKA_ADVERTISED_LISTENERS=INTERNAL://kafka_broker_3:9096,EXTERNAL://localhost:9097
       - KAFKA_LISTENERS=INTERNAL://0.0.0.0:9096,EXTERNAL://0.0.0.0:9097
       - KAFKA_INTER_BROKER_LISTENER_NAME=INTERNAL
-      # - KAFKA_LOG4J_LOGGERS= "kafka.controller=INFO,kafka.producer.async.DefaultEventHandler=INFO,state.change.logger=INFO"
+      - KAFKA_LOG4J_LOGGERS= "kafka.controller=INFO,kafka.producer.async.DefaultEventHandler=INFO,state.change.logger=INFO"
       - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=2
     # restart: always
     depends_on:
@@ -117,17 +117,17 @@ services:
     networks:
       - kafka_network
 
-  mongo:
-    container_name: mongo
-    image: mongo
-    restart: always
-    ports:
-      - "27017:27017"
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: example
-    networks:
-      - kafka_network
+  # mongo:
+  #   container_name: mongo
+  #   image: mongo
+  #   restart: always
+  #   ports:
+  #     - "27017:27017"
+  #   environment:
+  #     MONGO_INITDB_ROOT_USERNAME: root
+  #     MONGO_INITDB_ROOT_PASSWORD: example
+  #   networks:
+  #     - kafka_network
 
 networks:
   kafka_network:
