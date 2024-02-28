@@ -10,4 +10,7 @@ export default {
   dbConfig: {
     DATABASE_URL: env.DATABASE_URI,
   },
+  kafkaConfig: {
+    KAFKA_BROKER_ID: env.KAFKA_BROKER_IDS,
+  },
 };
