@@ -29,6 +29,9 @@ dependencies:
   joi:
     specifier: ^17.11.0
     version: 17.11.0
+  kafkajs:
+    specifier: ^2.2.4
+    version: 2.2.4
   mongoose:
     specifier: ^8.0.3
     version: 8.0.3
@@ -2584,6 +2587,11 @@ packages:
     engines: {node: '>=6'}
     hasBin: true
     dev: true
+
+  /kafkajs@2.2.4:
+    resolution: {integrity: sha512-j/YeapB1vfPT2iOIUn/vxdyKEuhuY2PxMBvf5JWux6iSaukAccrMtXEY/Lb7OvavDhOWME589bpLrEdnVHjfjA==}
+    engines: {node: '>=14.0.0'}
+    dev: false
 
   /kareem@2.5.1:
     resolution: {integrity: sha512-7jFxRVm+jD+rkq3kY0iZDJfsO2/t4BBPeEb2qKn2lR/9KhuksYk5hxzfRYWMPV8P/x2d0kHD306YyWLzjjH+uA==}

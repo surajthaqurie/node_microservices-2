@@ -1,8 +1,8 @@
 import { ILoginPayload, ISignupPayload, IUpdatePayload } from "src/common/interface";
 import { AUTH_MESSAGE_CONSTANT } from "../../common/constant";
 import { Auth } from "./auth.schema";
-import { BcryptHelper } from "../../common/utils";
-import axios from "axios";
+import { BcryptHelper, KafkaConfig } from "../../common/utils";
+// import axios from "axios";
 import { ConflictRequestError, BadRequestError, NotFoundError } from "@node_helper/error-handler";
 
 export class AuthService {
@@ -27,7 +27,10 @@ export class AuthService {
 
     try {
       //TODO: Microservice EVENT with transaction
-      const { data } = await axios.post("http://localhost:4000/api/v1/users", {
+
+      const kafkaConfig = new KafkaConfig("AuthService");
+      const topic = "your-topic";
+      const value = JSON.stringify({
         _id: user._id,
         firstName: payload.firstName,
         lastName: payload.lastName,
@@ -36,13 +39,33 @@ export class AuthService {
         address: payload.address,
       });
 
-      if (!data.success) {
-        await Auth.findByIdAndDelete(user._id);
-        throw new BadRequestError(data.message);
-      }
+      const messages = [
+        {
+          key: "USER_CREATED",
+          value,
+        },
+      ];
+
+      await kafkaConfig.produce(topic, messages);
+
+      // const { data } = await axios.post("http://localhost:4000/api/v1/users", {
+      //   _id: user._id,
+      //   firstName: payload.firstName,
+      //   lastName: payload.lastName,
+      //   email: user.email,
+      //   username: user.username,
+      //   address: payload.address,
+      // });
+
+      // if (!data.success) {
+      //   await Auth.findByIdAndDelete(user._id);
+      //   throw new BadRequestError(data.message);
+      // }
     } catch (error) {
       await Auth.findByIdAndDelete(user._id);
       throw new BadRequestError(error.message);
+    } finally {
+      // Disconnect from Kafka brokers
     }
 
     return user;
