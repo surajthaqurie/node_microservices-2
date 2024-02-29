@@ -1,14 +1,13 @@
 import { Consumer, Kafka, Message, Partitioners, Producer } from "kafkajs";
-import { env } from "src/configs";
 
 export class KafkaConfig {
   private producer: Producer;
   private consumer: Consumer;
 
-  constructor(groupId: string) {
+  constructor(groupId: string, clientId: string, brokerIds: string) {
     const kafka = new Kafka({
-      clientId: "user_client",
-      brokers: env.kafkaConfig.KAFKA_BROKER_ID.split(","),
+      clientId,
+      brokers: brokerIds.split(","),
       requestTimeout: 3000, // Increase the timeout value (in milliseconds)
       retry: {
         initialRetryTime: 100, // Initial retry delay (in milliseconds)
@@ -24,10 +23,12 @@ export class KafkaConfig {
     try {
       await this.producer.connect();
 
-      await this.producer.send({ topic, messages });
-      console.log("Kafka producer called by ::::: " + topic);
+      await this.producer.send({
+        topic,
+        messages,
+      });
     } catch (error) {
-      console.log("Error on kafka producer", error);
+      console.log(error);
     } finally {
       await this.producer.disconnect();
     }
@@ -41,17 +42,14 @@ export class KafkaConfig {
       await this.consumer.run({
         eachMessage: async ({ topic, partition, message }) => {
           const value = message.value?.toString();
-          console.log("Kafka consumer called by ::::: " + topic);
+          console.log({ value });
           callback(value);
         },
       });
     } catch (error) {
-      console.log("Error on kafka Consumer", error);
-    }
-    /* 
-    finally {
+      console.log(error);
+    } finally {
       await this.consumer.disconnect();
-    } 
-    */
+    }
   }
 }

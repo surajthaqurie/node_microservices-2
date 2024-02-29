@@ -1,9 +1,9 @@
 import { ILoginPayload, ISignupPayload, IUpdatePayload } from "src/common/interface";
 import { AUTH_MESSAGE_CONSTANT } from "../../common/constant";
 import { Auth } from "./auth.schema";
-import { BcryptHelper, KafkaConfig } from "../../common/utils";
-// import axios from "axios";
+import { BcryptHelper } from "../../common/utils";
 import { ConflictRequestError, BadRequestError, NotFoundError } from "@node_helper/error-handler";
+import { AuthProducer } from "./producers/authRegister.producer";
 
 export class AuthService {
   public async signup(payload: ISignupPayload) {
@@ -26,46 +26,20 @@ export class AuthService {
     if (!user) throw new BadRequestError(AUTH_MESSAGE_CONSTANT.UNABLE_SIGNUP_USER);
 
     try {
-      //TODO: Microservice EVENT with transaction
-
-      const kafkaConfig = new KafkaConfig("AuthService");
-      const topic = "your-topic";
-      const value = JSON.stringify({
+      //TODO: Mongo transaction
+      const value = {
         _id: user._id,
         firstName: payload.firstName,
         lastName: payload.lastName,
         email: user.email,
         username: user.username,
         address: payload.address,
-      });
+      };
 
-      const messages = [
-        {
-          key: "USER_CREATED",
-          value,
-        },
-      ];
-
-      await kafkaConfig.produce(topic, messages);
-
-      // const { data } = await axios.post("http://localhost:4000/api/v1/users", {
-      //   _id: user._id,
-      //   firstName: payload.firstName,
-      //   lastName: payload.lastName,
-      //   email: user.email,
-      //   username: user.username,
-      //   address: payload.address,
-      // });
-
-      // if (!data.success) {
-      //   await Auth.findByIdAndDelete(user._id);
-      //   throw new BadRequestError(data.message);
-      // }
+      new AuthProducer().registerProducer(value);
     } catch (error) {
       await Auth.findByIdAndDelete(user._id);
       throw new BadRequestError(error.message);
-    } finally {
-      // Disconnect from Kafka brokers
     }
 
     return user;

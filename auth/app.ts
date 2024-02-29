@@ -5,8 +5,9 @@ import helmet from "helmet";
 import path from "path";
 
 import appRouter from "./src/routes";
-import { DbConnection, KafkaConfig } from "./src/common/utils";
+import { DbConnection } from "./src/common/utils";
 import { errorHandler } from "@node_helper/error-handler";
+
 class App {
   public app: express.Application;
 
@@ -37,29 +38,6 @@ class App {
     new DbConnection().connect();
   }
 }
-
-(async () => {
-  try {
-    const kafkaConfig = new KafkaConfig("AuthService");
-    const topic = "your-topic";
-
-    const value = JSON.stringify({
-      firstName: "payload.firstName",
-      address: "payload.address",
-    });
-
-    const messages = [
-      {
-        key: "USER_CREATED",
-        value,
-      },
-    ];
-
-    await kafkaConfig.produce(topic, messages);
-  } catch (error) {
-    console.error("Producer error:", error);
-  }
-})();
 
 const app = new App().app;
 app.use(errorHandler);

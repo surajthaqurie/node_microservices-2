@@ -7,7 +7,7 @@ import path from "path";
 import appRouter from "./src/routes";
 import { DbConnection, KafkaConfig } from "./src/common/utils";
 import { errorHandler } from "@node_helper/error-handler";
-import { callbackfunction, callbackfunction1 } from "src/kafka/consumer";
+import { UserRegisterConsumer } from "src/modules/users/consumer";
 
 class App {
   public app: express.Application;
@@ -17,7 +17,7 @@ class App {
     this.configureMiddlewares();
     this.configureRoute();
     this.dbConnector();
-    this.consumer();
+    this.kafkaConsumer();
   }
 
   private configureMiddlewares(): void {
@@ -40,14 +40,10 @@ class App {
     new DbConnection().connect();
   }
 
-  private async consumer() {
+  private async kafkaConsumer() {
     try {
-      const kafkaConfig = new KafkaConfig("UserService");
-      const topic = "your-topic";
-      const topic1 = "your-topic-1";
-
-      await kafkaConfig.consume(topic, callbackfunction);
-      await kafkaConfig.consume(topic1, callbackfunction1);
+      const kafkaConfig = new KafkaConfig("UserServiceGroup");
+      new UserRegisterConsumer(kafkaConfig);
     } catch (error) {
       console.error("consumed error:", error);
     }

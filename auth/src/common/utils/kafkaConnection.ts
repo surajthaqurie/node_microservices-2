@@ -24,12 +24,10 @@ export class KafkaConfig {
     try {
       await this.producer.connect();
 
-      await this.producer.send({
-        topic,
-        messages,
-      });
+      await this.producer.send({ topic, messages });
+      console.log("Kafka producer called by ::::: " + topic);
     } catch (error) {
-      console.log(error);
+      console.log("Error on kafka producer", error);
     } finally {
       await this.producer.disconnect();
     }
@@ -43,14 +41,16 @@ export class KafkaConfig {
       await this.consumer.run({
         eachMessage: async ({ topic, partition, message }) => {
           const value = message.value?.toString();
-          console.log({ value });
+          console.log("Kafka consumer called by ::::: " + topic);
           callback(value);
         },
       });
     } catch (error) {
-      console.log(error);
-    } finally {
-      await this.consumer.disconnect();
+      console.log("Error on kafka Consumer", error);
     }
+    /*  finally {
+      await this.consumer.disconnect();
+    } 
+    */
   }
 }
