@@ -9,4 +9,4 @@ userRouter.route("/:id").get(new UserController().getUser).put(new UserControlle
 
 userRouter.route("/enable-disable/:id").patch(new UserController().enableDisableUser);
 
-export default userRouter;
+export { userRouter };

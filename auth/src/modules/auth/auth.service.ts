@@ -2,8 +2,9 @@ import { ILoginPayload, ISignupPayload, IUpdatePayload } from "src/common/interf
 import { AUTH_MESSAGE_CONSTANT } from "../../common/constant";
 import { Auth } from "./auth.schema";
 import { BcryptHelper } from "../../common/utils";
-import { ConflictRequestError, BadRequestError, NotFoundError } from "@node_helper/error-handler";
-import { AuthProducer } from "./producers/authRegister.producer";
+import { ConflictRequestError, BadRequestError, NotFoundError, BadRequestResponse } from "@node_helper/error-handler";
+import { AuthProducer } from "./auth.producer";
+import { updateValidation } from "./auth.validation";
 
 export class AuthService {
   public async signup(payload: ISignupPayload) {
@@ -60,8 +61,12 @@ export class AuthService {
     return user;
   }
 
-  public async updateUser(id: string, payload: IUpdatePayload) {
-    const user = await Auth.findByIdAndUpdate(id, payload, { new: true });
+  public async updateUser(payload: IUpdatePayload) {
+    const { error, value } = updateValidation(payload);
+    if (error) throw new BadRequestResponse(error.details[0].message);
+
+    const { id, ...restPayload } = value;
+    const user = await Auth.findByIdAndUpdate(id, restPayload, { new: true });
 
     if (!user) throw new BadRequestError(AUTH_MESSAGE_CONSTANT.UNABLE_TO_UPDATE_USER);
 

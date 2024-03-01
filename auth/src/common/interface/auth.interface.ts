@@ -23,6 +23,7 @@ export interface ISignupPayload extends ILoginPayload {
 }
 
 export interface IUpdatePayload {
+  id: string;
   username: string;
   email: string;
 }

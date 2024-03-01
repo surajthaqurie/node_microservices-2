@@ -7,6 +7,7 @@ import path from "path";
 import appRouter from "./src/routes";
 import { DbConnection } from "./src/common/utils";
 import { errorHandler } from "@node_helper/error-handler";
+// import { AuthConsumer } from "src/modules/auth";
 
 class App {
   public app: express.Application;
@@ -16,6 +17,7 @@ class App {
     this.configureMiddlewares();
     this.configureRoute();
     this.dbConnector();
+    this.kafkaConsumer();
   }
 
   private configureMiddlewares(): void {
@@ -36,6 +38,16 @@ class App {
 
   private dbConnector(): void {
     new DbConnection().connect();
+  }
+
+  private async kafkaConsumer() {
+    try {
+      // new AuthConsumer("USER_UPDATE");
+      // new AuthConsumer("USER_ENABLE_DISABLE");
+      // new AuthConsumer("USER_DELETE");
+    } catch (error) {
+      console.error("consumed error:", error);
+    }
   }
 }
 

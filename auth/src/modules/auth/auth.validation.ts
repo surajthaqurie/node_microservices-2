@@ -44,8 +44,8 @@ export const signupValidation = (data: ISignupPayload): Joi.ValidationResult<ISi
       "any.required": AUTH_PAYLOAD_VALIDATION_MESSAGE_CONSTANT.CONFIRM_PASSWORD_MUST_BE_STRING,
     }),
     address: Joi.string().trim().required().messages({
-      "string.base": AUTH_PAYLOAD_VALIDATION_MESSAGE_CONSTANT.ADDRESS_PASSWORD_MUST_BE_STRING,
-      "any.required": AUTH_PAYLOAD_VALIDATION_MESSAGE_CONSTANT.ADDRESS_PASSWORD_MUST_BE_STRING,
+      "string.base": AUTH_PAYLOAD_VALIDATION_MESSAGE_CONSTANT.ADDRESS_MUST_BE_STRING,
+      "any.required": AUTH_PAYLOAD_VALIDATION_MESSAGE_CONSTANT.ADDRESS_MUST_BE_REQUIRED,
     }),
   }).options({ abortEarly: false });
 
@@ -54,6 +54,10 @@ export const signupValidation = (data: ISignupPayload): Joi.ValidationResult<ISi
 
 export const updateValidation = (data: IUpdatePayload): Joi.ValidationResult<IUpdatePayload> => {
   const schema = Joi.object<IUpdatePayload, true>({
+    id: Joi.string().trim().required().messages({
+      "string.base": AUTH_PAYLOAD_VALIDATION_MESSAGE_CONSTANT.USER_ID_MUST_BE_STRING,
+      "any.required": AUTH_PAYLOAD_VALIDATION_MESSAGE_CONSTANT.USER_ID_MUST_BE_REQUIRED,
+    }),
     email: Joi.string().email().lowercase().trim().required().messages({
       "string.base": AUTH_PAYLOAD_VALIDATION_MESSAGE_CONSTANT.EMAIL_MUST_BE_STRING,
       "any.required": AUTH_PAYLOAD_VALIDATION_MESSAGE_CONSTANT.EMAIL_MUST_BE_REQUIRED,

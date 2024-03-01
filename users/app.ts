@@ -5,9 +5,9 @@ import helmet from "helmet";
 import path from "path";
 
 import appRouter from "./src/routes";
-import { DbConnection, KafkaConfig } from "./src/common/utils";
+import { DbConnection } from "./src/common/utils";
 import { errorHandler } from "@node_helper/error-handler";
-import { UserRegisterConsumer } from "src/modules/users/consumer";
+import { UserConsumer } from "src/modules/users";
 
 class App {
   public app: express.Application;
@@ -42,8 +42,7 @@ class App {
 
   private async kafkaConsumer() {
     try {
-      const kafkaConfig = new KafkaConfig("UserServiceGroup");
-      new UserRegisterConsumer(kafkaConfig);
+      new UserConsumer("USER_CREATE");
     } catch (error) {
       console.error("consumed error:", error);
     }
