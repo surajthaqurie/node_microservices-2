@@ -1,33 +1,40 @@
-import { KafkaConnect } from "./kafkaConnection";
+import { Kafka } from "kafkajs";
 
-enum KAFKA_TOPIC {
+export enum KAFKA_TOPIC {
   USER_UPDATE = "user:update",
   USER_ENABLE_DISABLE = "user:enable_disable",
   USER_DELETE = "user:delete",
 }
 
-export abstract class BaseConsumer<T extends { topic: KAFKA_TOPIC; value: string }> {
-  abstract topic: T["topic"];
+export abstract class BaseConsumer<T extends { data: Record<string, any> }> {
+  abstract topic: KAFKA_TOPIC;
   abstract groupId: string;
-  abstract clientId: string;
+  private readonly kafkaClient: Kafka;
 
-  abstract callback(value: string | undefined): void;
+  abstract callback(value: T["data"]): void;
+
+  constructor(kafkaClient: Kafka) {
+    this.kafkaClient = kafkaClient;
+  }
 
   async consume() {
     try {
-      const kafka = new KafkaConnect(this.clientId).getKafka();
-      const consumer = kafka.consumer({ groupId: this.groupId });
+      const consumer = this.kafkaClient.consumer({ groupId: this.groupId });
 
       await consumer.connect();
       await consumer.subscribe({ topic: this.topic, fromBeginning: true });
 
       await consumer.run({
         eachMessage: async ({ topic, partition, message }) => {
-          const value = message.value?.toString();
-          console.log("Kafka consumer called by ::::: " + topic);
-          this.callback(value);
+          if (message.value) {
+            const value = message.value.toString();
+            console.log("Kafka consumer called by ::::: " + topic);
+            this.callback(JSON.parse(value));
+          }
         },
       });
+
+      console.log("Kafka consumer started");
     } catch (error) {
       console.log("Error on kafka Consumer", error);
     }
