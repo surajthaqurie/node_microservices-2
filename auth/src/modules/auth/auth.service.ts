@@ -1,9 +1,10 @@
-import { ILoginPayload, ISignupPayload, IUpdatePayload } from "src/common/interface";
+import { ILoginPayload, ISignupPayload, IAuthUpdatePayload } from "src/common/interface";
 import { AUTH_MESSAGE_CONSTANT } from "../../common/constant";
 import { Auth } from "./auth.schema";
-import { BcryptHelper, KafkaConfig } from "../../common/utils";
-// import axios from "axios";
-import { ConflictRequestError, BadRequestError, NotFoundError } from "@node_helper/error-handler";
+import { BcryptHelper } from "../../utils";
+import { ConflictRequestError, BadRequestError, NotFoundError, BadRequestResponse } from "@node_helper/error-handler";
+import { AuthRegisterProducer } from "./auth.producer";
+import { updateValidation } from "./auth.validation";
 
 export class AuthService {
   public async signup(payload: ISignupPayload) {
@@ -26,46 +27,20 @@ export class AuthService {
     if (!user) throw new BadRequestError(AUTH_MESSAGE_CONSTANT.UNABLE_SIGNUP_USER);
 
     try {
-      //TODO: Microservice EVENT with transaction
-
-      const kafkaConfig = new KafkaConfig("AuthService");
-      const topic = "your-topic";
-      const value = JSON.stringify({
+      //TODO: Mongo transaction
+      const value = {
         _id: user._id,
         firstName: payload.firstName,
         lastName: payload.lastName,
         email: user.email,
         username: user.username,
         address: payload.address,
-      });
+      };
 
-      const messages = [
-        {
-          key: "USER_CREATED",
-          value,
-        },
-      ];
-
-      await kafkaConfig.produce(topic, messages);
-
-      // const { data } = await axios.post("http://localhost:4000/api/v1/users", {
-      //   _id: user._id,
-      //   firstName: payload.firstName,
-      //   lastName: payload.lastName,
-      //   email: user.email,
-      //   username: user.username,
-      //   address: payload.address,
-      // });
-
-      // if (!data.success) {
-      //   await Auth.findByIdAndDelete(user._id);
-      //   throw new BadRequestError(data.message);
-      // }
+      new AuthRegisterProducer(value).produce();
     } catch (error) {
       await Auth.findByIdAndDelete(user._id);
       throw new BadRequestError(error.message);
-    } finally {
-      // Disconnect from Kafka brokers
     }
 
     return user;
@@ -86,8 +61,12 @@ export class AuthService {
     return user;
   }
 
-  public async updateUser(id: string, payload: IUpdatePayload) {
-    const user = await Auth.findByIdAndUpdate(id, payload, { new: true });
+  public async updateUser(payload: IAuthUpdatePayload) {
+    const { error, value } = updateValidation(payload);
+    if (error) throw new BadRequestResponse(error.details[0].message);
+
+    const { id, ...restPayload } = value;
+    const user = await Auth.findByIdAndUpdate(id, restPayload, { new: true });
 
     if (!user) throw new BadRequestError(AUTH_MESSAGE_CONSTANT.UNABLE_TO_UPDATE_USER);
 

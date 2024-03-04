@@ -5,8 +5,10 @@ import helmet from "helmet";
 import path from "path";
 
 import appRouter from "./src/routes";
-import { DbConnection, KafkaConfig } from "./src/common/utils";
+import { DbConnection, kafkaClient } from "./src/utils";
 import { errorHandler } from "@node_helper/error-handler";
+import { AuthDeleteConsumer, AuthEnableDisableConsumer, AuthUpdateConsumer } from "src/modules/auth";
+
 class App {
   public app: express.Application;
 
@@ -15,6 +17,7 @@ class App {
     this.configureMiddlewares();
     this.configureRoute();
     this.dbConnector();
+    this.kafkaConsumer();
   }
 
   private configureMiddlewares(): void {
@@ -36,30 +39,17 @@ class App {
   private dbConnector(): void {
     new DbConnection().connect();
   }
-}
 
-(async () => {
-  try {
-    const kafkaConfig = new KafkaConfig("AuthService");
-    const topic = "your-topic";
-
-    const value = JSON.stringify({
-      firstName: "payload.firstName",
-      address: "payload.address",
-    });
-
-    const messages = [
-      {
-        key: "USER_CREATED",
-        value,
-      },
-    ];
-
-    await kafkaConfig.produce(topic, messages);
-  } catch (error) {
-    console.error("Producer error:", error);
+  private async kafkaConsumer() {
+    try {
+      new AuthUpdateConsumer(kafkaClient).consume();
+      new AuthEnableDisableConsumer(kafkaClient).consume();
+      new AuthDeleteConsumer(kafkaClient).consume();
+    } catch (error) {
+      console.error("consumed error:", error);
+    }
   }
-})();
+}
 
 const app = new App().app;
 app.use(errorHandler);

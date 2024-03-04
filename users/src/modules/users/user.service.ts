@@ -1,9 +1,9 @@
 import { IUserUpdatePayload, IUserRegisterPayload } from "src/common/interfaces";
 import { USER_MESSAGE_CONSTANT } from "../../common/constant";
 import User from "./user.schema";
-import { paginationQuery } from "src/common/utils";
-import axios from "axios";
+import { paginationQuery } from "utils";
 import { BadRequestError, ConflictRequestError, NotFoundError } from "@node_helper/error-handler";
+import { UserUpdateProducer, UserEnableDisableProducer, UserDeleteProducer } from "./user.producer";
 
 export class UserService {
   public async registerUser(payload: IUserRegisterPayload) {
@@ -43,13 +43,7 @@ export class UserService {
 
     if (user.email !== payload.email || user.username !== payload.username) {
       try {
-        const { data } = await axios.put(`http://localhost:4001/api/v1/auth/${id}`, {
-          email: updateUser.email,
-          username: updateUser.username,
-        });
-        if (!data.success) {
-          throw new BadRequestError(data.message);
-        }
+        new UserUpdateProducer({ id: updateUser._id, email: updateUser.email, username: updateUser.username }).produce();
       } catch (error) {
         throw new BadRequestError(error.message);
       }
@@ -68,10 +62,7 @@ export class UserService {
       throw new BadRequestError(user.isDeleted ? USER_MESSAGE_CONSTANT.UNABLE_TO_DISABLE_USER : USER_MESSAGE_CONSTANT.UNABLE_TO_ENABLE_USER);
 
     try {
-      const { data } = await axios.patch(`http://localhost:4001/api/v1/auth/enable-disable/${id}`);
-      if (!data.success) {
-        throw new BadRequestError(data.message);
-      }
+      new UserEnableDisableProducer(id).produce();
     } catch (error) {
       throw new BadRequestError(error.message);
     }
@@ -87,10 +78,7 @@ export class UserService {
     if (!user) throw new NotFoundError(USER_MESSAGE_CONSTANT.USER_RECORD_NOT_FOUND);
 
     try {
-      const { data } = await axios.delete(`http://localhost:4001/api/v1/auth/${id}`);
-      if (!data.success) {
-        throw new BadRequestError(data.message);
-      }
+      new UserDeleteProducer(id).produce();
     } catch (error) {
       throw new BadRequestError(error.message);
     }

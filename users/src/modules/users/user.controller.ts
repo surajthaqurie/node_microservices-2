@@ -52,7 +52,7 @@ export class UserController {
 
       const userId = req.params.id;
       const user = await new UserService().updateUser(userId, value);
-      return new SuccessResponse(USER_MESSAGE_CONSTANT.USERS_FETCHED_SUCCESSFULLY, user).sendResponse(res);
+      return new SuccessResponse(USER_MESSAGE_CONSTANT.USER_UPDATED_SUCCESSFULLY, user).sendResponse(res);
     } catch (error) {
       return next(error);
     }

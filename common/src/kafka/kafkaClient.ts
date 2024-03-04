@@ -1,5 +1,4 @@
 import { Consumer, Kafka, Message, Partitioners, Producer } from "kafkajs";
-import { env } from "src/configs";
 
 export class KafkaConfig {
   private producer: Producer;
@@ -7,8 +6,8 @@ export class KafkaConfig {
 
   constructor(groupId: string) {
     const kafka = new Kafka({
-      clientId: "user_client",
-      brokers: env.kafkaConfig.KAFKA_BROKER_ID.split(","),
+      clientId: "auth-client",
+      brokers: ["localhost:9093", "localhost:9095", "localhost:9097"],
       requestTimeout: 3000, // Increase the timeout value (in milliseconds)
       retry: {
         initialRetryTime: 100, // Initial retry delay (in milliseconds)
@@ -24,12 +23,10 @@ export class KafkaConfig {
     try {
       await this.producer.connect();
 
-      await this.producer.send({
-        topic,
-        messages,
-      });
+      await this.producer.send({ topic, messages });
+      console.log("Kafka producer called by ::::: " + topic);
     } catch (error) {
-      console.log(error);
+      console.log("Error on kafka producer", error);
     } finally {
       await this.producer.disconnect();
     }
@@ -41,17 +38,18 @@ export class KafkaConfig {
       await this.consumer.subscribe({ topic, fromBeginning: true });
 
       await this.consumer.run({
-        eachMessage: async ({ topic, partition, message, heartbeat, pause }) => {
-          console.log({
-            key: message.key?.toString(),
-            value: message.value?.toString(),
-            headers: message.headers,
-          });
-          callback(message.value?.toString());
+        eachMessage: async ({ topic, partition, message }) => {
+          const value = message.value?.toString();
+          console.log("Kafka consumer called by ::::: " + topic);
+          callback(value);
         },
       });
     } catch (error) {
-      console.log(error);
+      console.log("Error on kafka Consumer", error);
     }
+    /*  finally {
+      await this.consumer.disconnect();
+    } 
+    */
   }
 }
