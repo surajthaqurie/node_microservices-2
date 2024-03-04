@@ -1,15 +1,21 @@
-import { KafkaConfig } from "src/common/utils";
+import { KAFKA_TOPIC } from "src/common/enum";
+import { IUserRegister } from "src/common/interfaces";
+import { BaseConsumer } from "utils";
 import { UserService } from "./user.service";
+import { Kafka } from "kafkajs";
 
-export class UserConsumer {
-  private kafka: KafkaConfig;
+export class UserRegisterConsumer extends BaseConsumer<{ data: IUserRegister }> {
+  topic: KAFKA_TOPIC = KAFKA_TOPIC.USER_CREATE;
+  groupId: string = "UserRegisterGroup";
 
-  constructor(topic: string) {
-    this.kafka = new KafkaConfig("UserServiceGroup");
-    this.kafka.consume(topic, this.UserRegisterConsume);
+  userService: UserService;
+
+  constructor(kafkaClient: Kafka) {
+    super(kafkaClient);
+    this.userService = new UserService();
   }
 
-  async UserRegisterConsume(value: string) {
-    await new UserService().registerUser(JSON.parse(value));
+  async callback(value: IUserRegister): Promise<void> {
+    await this.userService.registerUser(value);
   }
 }

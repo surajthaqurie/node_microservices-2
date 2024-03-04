@@ -2,7 +2,7 @@ import { IAuthDocument, ISignupPayload } from "../../../common/interface";
 import { AUTH_MESSAGE_CONSTANT } from "../../../common/constant";
 import { AuthService } from "../auth.service";
 import { Auth } from "../auth.schema";
-import { BcryptHelper } from "../../../common/utils";
+import { BcryptHelper } from "../../../utils";
 import mongoose from "mongoose";
 import axios from "axios";
 

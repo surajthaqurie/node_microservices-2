@@ -1,31 +1,34 @@
+import { Message } from "kafkajs";
 import mongoose from "mongoose";
-import { KafkaConfig } from "src/common/utils";
+import { KAFKA_TOPIC } from "src/common/enum";
+import { BaseProducer, kafkaClient } from "utils";
 
-export class UserProducer {
-  kafka: KafkaConfig;
+export class UserUpdateProducer extends BaseProducer<{ data: Message[] }> {
+  topic: KAFKA_TOPIC = KAFKA_TOPIC.USER_UPDATE;
+  data: Message[];
 
-  constructor() {
-    this.kafka = new KafkaConfig("UserServiceGroup");
+  constructor(data: { id: mongoose.Types.ObjectId; email: string; username: string }) {
+    super(kafkaClient);
+    this.data = [{ key: this.topic, value: JSON.stringify(data) }];
   }
+}
 
-  updateUserProducer(value: { id: mongoose.Types.ObjectId; email: string; username: string }) {
-    const topic = "USER_UPDATE";
-    const messages = [{ key: topic, value: JSON.stringify(value) }];
+export class UserEnableDisableProducer extends BaseProducer<{ data: Message[] }> {
+  topic: KAFKA_TOPIC = KAFKA_TOPIC.USER_ENABLE_DISABLE;
+  data: Message[];
 
-    this.kafka.produce(topic, messages);
+  constructor(data: string) {
+    super(kafkaClient);
+    this.data = [{ key: this.topic, value: JSON.stringify(data) }];
   }
+}
 
-  enableUserProducer(value: { id: string }) {
-    const topic = "USER_ENABLE_DISABLE";
-    const messages = [{ key: topic, value: JSON.stringify(value) }];
+export class UserDeleteProducer extends BaseProducer<{ data: Message[] }> {
+  topic: KAFKA_TOPIC = KAFKA_TOPIC.USER_DELETE;
+  data: Message[];
 
-    this.kafka.produce(topic, messages);
-  }
-
-  deleteUserProducer(value: { id: string }) {
-    const topic = "USER_DELETE";
-    const messages = [{ key: topic, value: JSON.stringify(value) }];
-
-    this.kafka.produce(topic, messages);
+  constructor(data: string) {
+    super(kafkaClient);
+    this.data = [{ key: this.topic, value: JSON.stringify(data) }];
   }
 }

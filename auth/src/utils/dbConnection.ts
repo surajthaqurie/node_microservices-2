@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { env } from "../../configs";
+import { env } from "../configs";
 
 export class DbConnection {
   public connect() {

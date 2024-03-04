@@ -1,5 +1,4 @@
 import { Consumer, Kafka, Message, Partitioners, Producer } from "kafkajs";
-import { env } from "src/configs";
 
 export class KafkaConfig {
   private producer: Producer;
@@ -7,8 +6,8 @@ export class KafkaConfig {
 
   constructor(groupId: string) {
     const kafka = new Kafka({
-      clientId: "user_client",
-      brokers: env.kafkaConfig.KAFKA_BROKER_ID.split(","),
+      clientId: "auth-client",
+      brokers: ["localhost:9093", "localhost:9095", "localhost:9097"],
       requestTimeout: 3000, // Increase the timeout value (in milliseconds)
       retry: {
         initialRetryTime: 100, // Initial retry delay (in milliseconds)
@@ -48,8 +47,7 @@ export class KafkaConfig {
     } catch (error) {
       console.log("Error on kafka Consumer", error);
     }
-    /* 
-    finally {
+    /*  finally {
       await this.consumer.disconnect();
     } 
     */

@@ -1,1 +1,1 @@
-export * from "./kafkaConfig";
+export * from "./kafkaClient";

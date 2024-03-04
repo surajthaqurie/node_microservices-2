@@ -1,10 +1,10 @@
 import { AuthService } from "./auth.service";
-import { BaseConsumer } from "src/common/utils/baseConsumer";
-import { IUpdatePayload } from "src/common/interface";
+import { BaseConsumer } from "src/utils/baseConsumer";
+import { IAuthUpdatePayload } from "src/common/interface";
 import { Kafka } from "kafkajs";
 import { KAFKA_TOPIC } from "src/common/enum";
 
-export class AuthUpdateConsumer extends BaseConsumer<{ data: IUpdatePayload }> {
+export class AuthUpdateConsumer extends BaseConsumer<{ data: IAuthUpdatePayload }> {
   groupId: string = "AuthUserUpdateGroup";
   topic = KAFKA_TOPIC.USER_UPDATE;
   authService: AuthService;
@@ -14,14 +14,12 @@ export class AuthUpdateConsumer extends BaseConsumer<{ data: IUpdatePayload }> {
     this.authService = new AuthService();
   }
 
-  async callback(value: IUpdatePayload) {
-    console.log("test");
-
+  async callback(value: IAuthUpdatePayload) {
     await this.authService.updateUser(value);
   }
 }
 
-export class AuthEnableDisableConsumer extends BaseConsumer<{ data: IUpdatePayload }> {
+export class AuthEnableDisableConsumer extends BaseConsumer<{ data: string }> {
   groupId: string = "AuthUserEnableDisableGroup";
   topic = KAFKA_TOPIC.USER_ENABLE_DISABLE;
   authService: AuthService;
@@ -31,12 +29,12 @@ export class AuthEnableDisableConsumer extends BaseConsumer<{ data: IUpdatePaylo
     this.authService = new AuthService();
   }
 
-  async callback(value: IUpdatePayload) {
-    await this.authService.updateUser(value);
+  async callback(value: string) {
+    await this.authService.enableDisableUser(value);
   }
 }
 
-export class AuthDeleteConsumer extends BaseConsumer<{ data: any }> {
+export class AuthDeleteConsumer extends BaseConsumer<{ data: string }> {
   groupId: string = "AuthUserDeleteGroup";
   topic = KAFKA_TOPIC.USER_DELETE;
   authService: AuthService;
@@ -47,7 +45,6 @@ export class AuthDeleteConsumer extends BaseConsumer<{ data: any }> {
   }
 
   async callback(value: string): Promise<void> {
-    console.log("🚀 ~ deleteUserConsumer ~ callback ~ value:", value);
     await this.authService.deleteUser(value);
   }
 }

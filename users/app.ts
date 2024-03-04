@@ -5,9 +5,9 @@ import helmet from "helmet";
 import path from "path";
 
 import appRouter from "./src/routes";
-import { DbConnection } from "./src/common/utils";
+import { DbConnection, kafkaClient } from "./utils";
 import { errorHandler } from "@node_helper/error-handler";
-import { UserConsumer } from "src/modules/users";
+import { UserRegisterConsumer } from "src/modules/users";
 
 class App {
   public app: express.Application;
@@ -42,7 +42,7 @@ class App {
 
   private async kafkaConsumer() {
     try {
-      new UserConsumer("USER_CREATE");
+      new UserRegisterConsumer(kafkaClient).consume();
     } catch (error) {
       console.error("consumed error:", error);
     }

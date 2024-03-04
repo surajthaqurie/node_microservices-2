@@ -1,16 +1,14 @@
-import { KafkaConfig } from "src/common/utils";
+import { Message } from "kafkajs";
+import { KAFKA_TOPIC } from "src/common/enum";
+import { IAuthRegister } from "src/common/interface";
+import { kafkaClient, BaseProducer } from "src/utils";
 
-export class AuthProducer {
-  kafka: KafkaConfig;
+export class AuthRegisterProducer extends BaseProducer<{ data: Message[] }> {
+  topic = KAFKA_TOPIC.USER_CREATE;
+  data: Message[];
 
-  constructor() {
-    this.kafka = new KafkaConfig("AuthServiceGroup");
-  }
-
-  registerProducer(value: { _id: string; firstName: string; lastName: string; email: string; username: string; address: string }) {
-    const topic = "USER_CREATE";
-    const messages = [{ key: topic, value: JSON.stringify(value) }];
-
-    this.kafka.produce(topic, messages);
+  constructor(data: IAuthRegister) {
+    super(kafkaClient);
+    this.data = [{ key: this.topic, value: JSON.stringify(data) }];
   }
 }

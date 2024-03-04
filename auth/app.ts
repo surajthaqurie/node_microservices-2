@@ -5,10 +5,9 @@ import helmet from "helmet";
 import path from "path";
 
 import appRouter from "./src/routes";
-import { DbConnection } from "./src/common/utils";
+import { DbConnection, kafkaClient } from "./src/utils";
 import { errorHandler } from "@node_helper/error-handler";
 import { AuthDeleteConsumer, AuthEnableDisableConsumer, AuthUpdateConsumer } from "src/modules/auth";
-import { kafkaClient } from "src/common/utils/kafka";
 
 class App {
   public app: express.Application;

@@ -1,9 +1,9 @@
-import { ILoginPayload, ISignupPayload, IUpdatePayload } from "src/common/interface";
+import { ILoginPayload, ISignupPayload, IAuthUpdatePayload } from "src/common/interface";
 import { AUTH_MESSAGE_CONSTANT } from "../../common/constant";
 import { Auth } from "./auth.schema";
-import { BcryptHelper } from "../../common/utils";
+import { BcryptHelper } from "../../utils";
 import { ConflictRequestError, BadRequestError, NotFoundError, BadRequestResponse } from "@node_helper/error-handler";
-import { AuthProducer } from "./auth.producer";
+import { AuthRegisterProducer } from "./auth.producer";
 import { updateValidation } from "./auth.validation";
 
 export class AuthService {
@@ -37,7 +37,7 @@ export class AuthService {
         address: payload.address,
       };
 
-      new AuthProducer().registerProducer(value);
+      new AuthRegisterProducer(value).produce();
     } catch (error) {
       await Auth.findByIdAndDelete(user._id);
       throw new BadRequestError(error.message);
@@ -61,7 +61,7 @@ export class AuthService {
     return user;
   }
 
-  public async updateUser(payload: IUpdatePayload) {
+  public async updateUser(payload: IAuthUpdatePayload) {
     const { error, value } = updateValidation(payload);
     if (error) throw new BadRequestResponse(error.details[0].message);
 

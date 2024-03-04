@@ -1,9 +1,9 @@
 import { IUserUpdatePayload, IUserRegisterPayload } from "src/common/interfaces";
 import { USER_MESSAGE_CONSTANT } from "../../common/constant";
 import User from "./user.schema";
-import { paginationQuery } from "src/common/utils";
+import { paginationQuery } from "utils";
 import { BadRequestError, ConflictRequestError, NotFoundError } from "@node_helper/error-handler";
-import { UserProducer } from "./user.producer";
+import { UserUpdateProducer, UserEnableDisableProducer, UserDeleteProducer } from "./user.producer";
 
 export class UserService {
   public async registerUser(payload: IUserRegisterPayload) {
@@ -43,7 +43,7 @@ export class UserService {
 
     if (user.email !== payload.email || user.username !== payload.username) {
       try {
-        new UserProducer().updateUserProducer({ id: updateUser._id, email: updateUser.email, username: updateUser.username });
+        new UserUpdateProducer({ id: updateUser._id, email: updateUser.email, username: updateUser.username }).produce();
       } catch (error) {
         throw new BadRequestError(error.message);
       }
@@ -62,7 +62,7 @@ export class UserService {
       throw new BadRequestError(user.isDeleted ? USER_MESSAGE_CONSTANT.UNABLE_TO_DISABLE_USER : USER_MESSAGE_CONSTANT.UNABLE_TO_ENABLE_USER);
 
     try {
-      new UserProducer().enableUserProducer({ id });
+      new UserEnableDisableProducer(id).produce();
     } catch (error) {
       throw new BadRequestError(error.message);
     }
@@ -78,7 +78,7 @@ export class UserService {
     if (!user) throw new NotFoundError(USER_MESSAGE_CONSTANT.USER_RECORD_NOT_FOUND);
 
     try {
-      new UserProducer().deleteUserProducer({ id });
+      new UserDeleteProducer(id).produce();
     } catch (error) {
       throw new BadRequestError(error.message);
     }

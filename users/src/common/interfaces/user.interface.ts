@@ -14,3 +14,12 @@ export interface IUser extends IUserUpdatePayload {
   createdAt: Date;
   updatedAt: Date;
 }
+
+export interface IUserRegister {
+  _id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  username: string;
+  address: string;
+}
