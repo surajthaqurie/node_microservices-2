@@ -1,37 +1,29 @@
-import { KafkaConfig } from "src/common/utils";
 import { AuthService } from "./auth.service";
-import { BaseConsumer, KAFKA_TOPIC } from "src/common/utils/baseConsumer";
+import { BaseConsumer } from "src/common/utils/baseConsumer";
 import { IUpdatePayload } from "src/common/interface";
 import { Kafka } from "kafkajs";
+import { KAFKA_TOPIC } from "src/common/enum";
 
-export class AuthConsumer {
-  private kafka: KafkaConfig;
-  authService = new AuthService();
-  topic: string;
+export class AuthUpdateConsumer extends BaseConsumer<{ data: IUpdatePayload }> {
+  groupId: string = "AuthUserUpdateGroup";
+  topic = KAFKA_TOPIC.USER_UPDATE;
+  authService: AuthService;
 
-  constructor(topic: string) {
-    this.kafka = new KafkaConfig("AuthServiceGroup");
-    this.topic = topic;
+  constructor(kafkaClient: Kafka) {
+    super(kafkaClient);
+    this.authService = new AuthService();
   }
 
-  async UpdateUserConsumer(value: string) {
-    this.kafka.consume(this.topic, this.UpdateUserConsumer);
-    await this.authService.updateUser(JSON.parse(value));
-  }
+  async callback(value: IUpdatePayload) {
+    console.log("test");
 
-  async enableDisableConsumer(value: string) {
-    this.kafka.consume(this.topic, this.enableDisableConsumer);
-    await this.authService.enableDisableUser(JSON.parse(value));
-  }
-
-  async deleteUserPConsumer(value: string) {
-    await this.authService.deleteUser(JSON.parse(value));
+    await this.authService.updateUser(value);
   }
 }
 
-export class AuthUpdateConsumer extends BaseConsumer<{ data: IUpdatePayload }> {
-  groupId: string = "AuthServiceGroup";
-  topic = KAFKA_TOPIC.USER_UPDATE;
+export class AuthEnableDisableConsumer extends BaseConsumer<{ data: IUpdatePayload }> {
+  groupId: string = "AuthUserEnableDisableGroup";
+  topic = KAFKA_TOPIC.USER_ENABLE_DISABLE;
   authService: AuthService;
 
   constructor(kafkaClient: Kafka) {
@@ -44,17 +36,18 @@ export class AuthUpdateConsumer extends BaseConsumer<{ data: IUpdatePayload }> {
   }
 }
 
-// export class AuthEnableDisbaleConsumer extends BaseConsumer<{ data: IUpdatePayload }> {
-//   groupId: string = "AuthServiceGroup";
-//   topic = KAFKA_TOPIC.USER_ENABLE_DISABLE;
-//   authService: AuthService;
+export class AuthDeleteConsumer extends BaseConsumer<{ data: any }> {
+  groupId: string = "AuthUserDeleteGroup";
+  topic = KAFKA_TOPIC.USER_DELETE;
+  authService: AuthService;
 
-//   constructor(kafkaClient: Kafka) {
-//     super(kafkaClient);
-//     this.authService = new AuthService();
-//   }
+  constructor(kafkaClient: Kafka) {
+    super(kafkaClient);
+    this.authService = new AuthService();
+  }
 
-//   async callback(value: IUpdatePayload) {
-//     await this.authService.updateUser(value);
-//   }
-// }
+  async callback(value: string): Promise<void> {
+    console.log("🚀 ~ deleteUserConsumer ~ callback ~ value:", value);
+    await this.authService.deleteUser(value);
+  }
+}

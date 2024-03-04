@@ -7,7 +7,7 @@ import path from "path";
 import appRouter from "./src/routes";
 import { DbConnection } from "./src/common/utils";
 import { errorHandler } from "@node_helper/error-handler";
-import { AuthUpdateConsumer } from "src/modules/auth";
+import { AuthDeleteConsumer, AuthEnableDisableConsumer, AuthUpdateConsumer } from "src/modules/auth";
 import { kafkaClient } from "src/common/utils/kafka";
 
 class App {
@@ -44,10 +44,8 @@ class App {
   private async kafkaConsumer() {
     try {
       new AuthUpdateConsumer(kafkaClient).consume();
-
-      // new AuthConsumer("USER_UPDATE");
-      // new AuthConsumer("USER_ENABLE_DISABLE");
-      // new AuthConsumer("USER_DELETE");
+      new AuthEnableDisableConsumer(kafkaClient).consume();
+      new AuthDeleteConsumer(kafkaClient).consume();
     } catch (error) {
       console.error("consumed error:", error);
     }
@@ -58,6 +56,3 @@ const app = new App().app;
 app.use(errorHandler);
 
 export default app;
-
-// abstract with generic types
-// super(){}

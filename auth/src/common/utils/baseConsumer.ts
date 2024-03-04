@@ -1,17 +1,12 @@
 import { Kafka } from "kafkajs";
-
-export enum KAFKA_TOPIC {
-  USER_UPDATE = "user:update",
-  USER_ENABLE_DISABLE = "user:enable_disable",
-  USER_DELETE = "user:delete",
-}
+import { KAFKA_TOPIC } from "../enum";
 
 export abstract class BaseConsumer<T extends { data: Record<string, any> }> {
   abstract topic: KAFKA_TOPIC;
   abstract groupId: string;
   private readonly kafkaClient: Kafka;
 
-  abstract callback(value: T["data"]): void;
+  abstract callback(value: T["data"]): Promise<void>;
 
   constructor(kafkaClient: Kafka) {
     this.kafkaClient = kafkaClient;
@@ -20,7 +15,6 @@ export abstract class BaseConsumer<T extends { data: Record<string, any> }> {
   async consume() {
     try {
       const consumer = this.kafkaClient.consumer({ groupId: this.groupId });
-
       await consumer.connect();
       await consumer.subscribe({ topic: this.topic, fromBeginning: true });
 
@@ -33,8 +27,6 @@ export abstract class BaseConsumer<T extends { data: Record<string, any> }> {
           }
         },
       });
-
-      console.log("Kafka consumer started");
     } catch (error) {
       console.log("Error on kafka Consumer", error);
     }
