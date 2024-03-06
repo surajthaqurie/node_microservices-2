@@ -1,6 +1,9 @@
 node_modules
 coverage
+logs
 
 .env
 
 todo.txt
+
+example.js
