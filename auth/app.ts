@@ -5,7 +5,7 @@ import helmet from "helmet";
 import path from "path";
 
 import appRouter from "./src/routes";
-import { DbConnection, kafkaClient } from "./src/utils";
+import { DbConnection, kafkaClient, logger } from "./src/utils";
 import { errorHandler } from "@node_helper/error-handler";
 import { AuthDeleteConsumer, AuthEnableDisableConsumer, AuthUpdateConsumer } from "src/modules/auth";
 
@@ -17,7 +17,7 @@ class App {
     this.configureMiddlewares();
     this.configureRoute();
     this.dbConnector();
-    this.kafkaConsumer();
+    // this.kafkaConsumer();
   }
 
   private configureMiddlewares(): void {
@@ -40,6 +40,7 @@ class App {
     new DbConnection().connect();
   }
 
+  // @ts-ignore
   private async kafkaConsumer() {
     try {
       new AuthUpdateConsumer(kafkaClient).consume();
@@ -50,6 +51,26 @@ class App {
     }
   }
 }
+
+/* Logger */
+logger.info("Info message");
+logger.error("Error message");
+logger.warn("Warning message");
+
+const childLogger = logger.child({ requestId: "f9ed4675f1c53513c61a3b3b4e25b4c0" });
+
+childLogger.info("Info message");
+childLogger.info("Error message");
+childLogger.info("File uploaded successfully", {
+  file: "something.png",
+  type: "image/png",
+  userId: "jdn33d8h2",
+});
+
+logger.error(new Error("an error"));
+// throw new Error("An uncaught error"); exception error
+
+/* Logger */
 
 const app = new App().app;
 app.use(errorHandler);
