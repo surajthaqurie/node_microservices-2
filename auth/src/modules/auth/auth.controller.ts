@@ -19,6 +19,7 @@ export class AuthController {
         data: user,
       });
     } catch (error) {
+      logger.error(error);
       return next(error);
     }
   }

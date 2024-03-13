@@ -2,42 +2,36 @@ import { env } from "src/configs";
 import { createLogger, format, transports } from "winston";
 
 // winston-daily-rotate-file
+// Morgan
 
-const errorFilter = format((info, opts) => (info.level === "error" ? info : false));
-const infoFilter = format((info, opts) => (info.level === "info" ? info : false));
+const errorFilter = format((log, opts) => (log.level === "error" ? log : false));
+const infoFilter = format((log, opts) => (log.level === "log" ? log : false));
 
-export const logger = createLogger({
-  level: process.env.LOG_LEVEL || "info",
-  exitOnError: false,
-  defaultMeta: {
-    service: env.appConfig.APP_NAME,
-  },
-  format: format.combine(
-    // format.label({ label: env.appConfig.APP_NAME }),
-    // format.errors({ stack: true }),
-    format.timestamp(),
-    format.ms(),
-    format.json()
-    // format.logstash() // not print the res.json
-    // format.splat(),
-    // format.simple(),
-  ),
+const logger = createLogger({
+  level: env.appConfig.NODE_ENV === "development" ? "debug" : "info",
+  format: format.combine(format.timestamp(), format.ms(), format.errors({ stack: true }), format.json()),
   transports: [
-    new transports.Console(),
+    new transports.Console({
+      format: format.combine(format.colorize({ all: true })),
+    }),
     new transports.File({
       level: "info",
-      filename: "logs/info.log",
+      filename: "../logs/info.log",
       format: format.combine(infoFilter()),
     }),
     new transports.File({
       level: "error",
-      filename: "logs/error.log",
+      filename: "../logs/error.log",
+      // handleExceptions: true,
+      // handleRejections: true,
       format: format.combine(errorFilter()),
     }),
   ],
-  exceptionHandlers: [new transports.File({ filename: "logs/exception.log" })],
-  rejectionHandlers: [new transports.File({ filename: "logs/rejections.log" })],
+  exitOnError: false,
+  exceptionHandlers: [new transports.File({ filename: "../logs/exception.log" })],
+  rejectionHandlers: [new transports.File({ filename: "../logs/rejections.log" })],
 });
 
-// https://betterstack.com/community/guides/logging/how-to-install-setup-and-use-winston-and-morgan-to-log-node-js-applications/
-// https://betterstack.com/community/guides/logging/nodejs-logging-best-practices/
+export { logger };
+
+// https://sematext.com/blog/node-js-logging/
