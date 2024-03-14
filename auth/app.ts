@@ -17,7 +17,7 @@ class App {
     this.configureMiddlewares();
     this.configureRoute();
     this.dbConnector();
-    // this.kafkaConsumer();
+    this.kafkaConsumer();
   }
 
   private configureMiddlewares(): void {

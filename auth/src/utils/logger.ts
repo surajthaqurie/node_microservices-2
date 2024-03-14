@@ -7,8 +7,8 @@ import DailyRotateFile from "winston-daily-rotate-file";
 // TODO: Use this error logger to error handler
 // TODO: Use this info logger to success response
 
-export class AppLogger {
-  static getLogger = (service: string) => {
+export const Logger = class AppLogger {
+  static getLogger = (service = "AppLogger") => {
     const logger = createLogger({
       level: env.appConfig.NODE_ENV === "development" ? "debug" : "info",
       exitOnError: false,
@@ -27,32 +27,34 @@ export class AppLogger {
         AppLogger.infoTransport(),
         AppLogger.errorTransport(),
       ],
+
+      // exceptionHandlers: [new transports.File({ filename: '../logs/exceptions.log' })],
+      // rejectionHandlers: [new transports.File({ filename: '../logs/rejections.log' })],
     });
 
     return logger;
   };
 
   static httpTransport() {
-    const httpFilter = format((info, opts) => (info.level === "http" ? info : false));
-
+    const httpFilter = format((log, opts) => (log.level === "http" ? log : false));
     return new DailyRotateFile({
       filename: "../logs/http-%DATE%.log",
-      datePattern: "HH-DD-MM-YYYY",
+      datePattern: "DD-MM-YYYY",
       zippedArchive: true,
       auditFile: "../logs/http-audit.json",
-      maxSize: "10m",
-      maxFiles: "14d",
+      maxSize: "2m",
+      maxFiles: "1d",
       level: "http",
       format: format.combine(httpFilter(), format.timestamp(), format.json()),
     });
   }
 
   static infoTransport() {
-    const infoFilter = format((log, opts) => (log.level === "log" ? log : false));
+    const infoFilter = format((log, opts) => (log.level === "info" ? log : false));
     return new DailyRotateFile({
       level: "info",
       filename: "../logs/info-%DATE%.log",
-      datePattern: "HH-DD-MM-YYYY",
+      datePattern: "DD-MM-YYYY",
       auditFile: "../logs/info-audit.json",
       zippedArchive: true,
       maxSize: "2m",
@@ -66,7 +68,7 @@ export class AppLogger {
     return new DailyRotateFile({
       level: "error",
       filename: "../logs/error-%DATE%.log",
-      datePattern: "HH-DD-MM-YYYY",
+      datePattern: "DD-MM-YYYY",
       auditFile: "../logs/error-audit.json",
       zippedArchive: true,
       handleExceptions: true,
@@ -76,9 +78,6 @@ export class AppLogger {
       format: format.combine(errorFilter(), format.timestamp(), format.json()),
     });
   }
-}
+}.getLogger;
 
-export const Logger = AppLogger.getLogger;
-
-// https://sematext.com/blog/node-js-logging/
 // https://dev.to/adeyemiadekore2/file-logging-in-nodejs-5e8l
