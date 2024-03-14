@@ -81,3 +81,5 @@ export const Logger = class AppLogger {
 }.getLogger;
 
 // https://dev.to/adeyemiadekore2/file-logging-in-nodejs-5e8l
+// https://www.packmind.com/access-logs-nodejs-winston-morgan-storage-elasticsearch/
+// https://mirzaleka.medium.com/automated-logging-in-express-js-a1f85ca6c5cd

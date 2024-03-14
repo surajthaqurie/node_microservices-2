@@ -5,7 +5,7 @@ import helmet from "helmet";
 import path from "path";
 
 import appRouter from "./src/routes";
-import { DbConnection, kafkaClient } from "./src/utils";
+import { DbConnection, Logger, kafkaClient } from "./src/utils";
 import { errorHandler } from "@node_helper/error-handler";
 import { AuthDeleteConsumer, AuthEnableDisableConsumer, AuthUpdateConsumer } from "src/modules/auth";
 
@@ -22,7 +22,16 @@ class App {
 
   private configureMiddlewares(): void {
     this.app.use(cors());
-    this.app.use(morgan("dev"));
+    this.app.use(
+      morgan("dev", {
+        stream: {
+          write(message: string) {
+            const logger = Logger();
+            return logger.http(message.replace(/\n$/, ""));
+          },
+        },
+      })
+    );
     this.app.set("rateLimit", 100);
 
     this.app.use(helmet());
