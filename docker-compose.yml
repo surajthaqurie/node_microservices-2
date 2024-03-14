@@ -117,20 +117,25 @@ services:
     networks:
       - kafka_network
 
-  # mongo:
-  #   container_name: mongo
-  #   image: mongo
-  #   restart: always
-  #   ports:
-  #     - "27017:27017"
-  #   environment:
-  #     MONGO_INITDB_ROOT_USERNAME: root
-  #     MONGO_INITDB_ROOT_PASSWORD: example
-  #   networks:
-  #     - kafka_network
+  mongo:
+    container_name: mongo_db
+    image: mongo
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - /db_volumes:/data/db
+    # environment:
+    #   MONGO_INITDB_ROOT_USERNAME: root
+    #   MONGO_INITDB_ROOT_PASSWORD: example
+    #   networks:
+    #     - kafka_network
 
 networks:
   kafka_network:
     # name: pub_sub_network
     # driver: bridge
     external: true
+
+volumes:
+  db_volumes:

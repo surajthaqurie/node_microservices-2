@@ -3,9 +3,9 @@
  * https://jestjs.io/docs/configuration
  */
 
-/** @type {import('ts-jest').JestConfigWithTsJest} */
+import type { Config } from "jest";
 
-export default {
+const config: Config = {
   verbose: true,
   preset: "ts-jest",
   testEnvironment: "node",
@@ -20,4 +20,10 @@ export default {
 
   resetMocks: true,
   clearMocks: true,
+
+  moduleNameMapper: {
+    "^src/(.*)": "<rootDir>/src/$1",
+  },
 };
+
+export default config;

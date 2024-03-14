@@ -1,5 +1,5 @@
 import { ILoginPayload, ISignupPayload, IAuthUpdatePayload } from "src/common/interface";
-import { AUTH_MESSAGE_CONSTANT } from "../../common/constant";
+import { AUTH_MESSAGE_CONSTANT } from "src/common/constant";
 import { Auth } from "./auth.schema";
 import { BcryptHelper } from "../../utils";
 import { ConflictRequestError, BadRequestError, NotFoundError, BadRequestResponse } from "@node_helper/error-handler";
@@ -7,6 +7,11 @@ import { AuthRegisterProducer } from "./auth.producer";
 import { updateValidation } from "./auth.validation";
 
 export class AuthService {
+  bcryptHelper: BcryptHelper;
+  constructor() {
+    this.bcryptHelper = new BcryptHelper();
+  }
+
   public async signup(payload: ISignupPayload) {
     if (payload.password !== payload.confirmPassword) throw new BadRequestError(AUTH_MESSAGE_CONSTANT.PASSWORD_AND_CONFIRM_PASSWORD_NOT_MATCHED);
 
@@ -16,7 +21,7 @@ export class AuthService {
     const username_taken = await Auth.findOne({ email: payload.email });
     if (username_taken) throw new ConflictRequestError(AUTH_MESSAGE_CONSTANT.USERNAME_ALREADY_TAKEN);
 
-    const hashPassword = await new BcryptHelper().generateHashPassword(payload.password as string);
+    const hashPassword = await this.bcryptHelper.generateHashPassword(payload.password as string);
 
     const user = await Auth.create({
       password: hashPassword,
@@ -51,9 +56,10 @@ export class AuthService {
       password: 1,
       isDeleted: 1,
     });
+
     if (!user) throw new BadRequestError(AUTH_MESSAGE_CONSTANT.INVALID_EMAIL_OR_PASSWORD);
 
-    const passwordMatched = await new BcryptHelper().verifyPassword(payload.password as string, user.password);
+    const passwordMatched = await this.bcryptHelper.verifyPassword(payload.password as string, user.password);
     if (!passwordMatched) throw new BadRequestError(AUTH_MESSAGE_CONSTANT.INVALID_EMAIL_OR_PASSWORD);
 
     if (user.isDeleted) throw new BadRequestError(AUTH_MESSAGE_CONSTANT.DISABLED_ACCOUNT);

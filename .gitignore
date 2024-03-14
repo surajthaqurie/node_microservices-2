@@ -1,6 +1,10 @@
 node_modules
 coverage
+logs
 
 .env
 
 todo.txt
+
+example.js
+db_volumes
