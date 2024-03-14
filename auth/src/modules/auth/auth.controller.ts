@@ -3,10 +3,11 @@ import { AuthService } from "./auth.service";
 import { loginValidation, signupValidation } from "./auth.validation";
 import { AUTH_MESSAGE_CONSTANT } from "../../common/constant";
 import { BadRequestResponse } from "@node_helper/error-handler";
-import { logger } from "src/utils";
+import { Logger } from "src/utils";
 
 export class AuthController {
   public async signup(req: Request, res: Response, next: NextFunction) {
+    const logger = Logger(AuthController.name + "-signup");
     try {
       const { error, value } = signupValidation(req.body);
       if (error) throw new BadRequestResponse(error.details[0].message);
@@ -25,6 +26,7 @@ export class AuthController {
   }
 
   public async login(req: Request, res: Response, next: NextFunction) {
+    const logger = Logger(AuthController.name + " -login");
     try {
       const { error, value } = loginValidation(req.body);
       if (error) throw new BadRequestResponse(error.details[0].message);
