@@ -9,7 +9,7 @@ import { DbConnection, Logger, kafkaClient } from "./src/utils";
 import { errorHandler } from "@node_helper/error-handler";
 import { AuthDeleteConsumer, AuthEnableDisableConsumer, AuthUpdateConsumer } from "src/modules/auth";
 
-class App {
+export class App {
   public app: express.Application;
 
   constructor() {
@@ -22,6 +22,8 @@ class App {
 
   private configureMiddlewares(): void {
     this.app.use(cors());
+    this.app.use(errorHandler);
+
     this.app.use(
       morgan("dev", {
         stream: {
@@ -60,8 +62,3 @@ class App {
     }
   }
 }
-
-const app = new App().app;
-app.use(errorHandler);
-
-export default app;
